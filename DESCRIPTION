@@ -10,23 +10,32 @@ Authors@R: c(person(given = "Pei-Shan",
            comment = c(ORCID = '0000-0001-7386-0552')),
            person(given = "Ching-Chuan",
            family = "Chen",
-           role = c("aut", "cre"),
+           role = c("aut"),
            email = "zw12356@gmail.com",
            comment = c(ORCID = '0009-0007-8273-3206')))
 Maintainer: Pei-Shan Yen <peishan0824@gmail.com>     
-Description: This package enables the estimation of single-modality high-dimensional mediation models. We employ penalized maximum likelihood and solve the estimation using the Alternating Direction Method of Multipliers (ADMM) to provide high-dimensional mediator estimates. To improve the sensitivity and specificity of non-zero mediators, we offer the sure independence screening (SIS) function for dimension reduction. The available penalty options include Lasso, Elastic Net, Pathway Lasso, and Network-constrained Penalty. The methods employed in the package are based on Lasso (doi.org/10.1111/j.2517-6161.1996.tb02080.x), Elastic Net (doi.org/10.1111/j.1467-9868.2005.00503.x), Pathway Lasso (10.4310/21-sii673), Network Penalty (doi.org/10.1093/bioinformatics/btn081), ADMM (doi.org/10.1561/2200000016), and SIS (doi.org/10.1111/j.1467-9868.2008.00674.x). 
+Description: 
+   This package enables the estimation of single-modality high-dimensional mediation models.
+   We employ penalized maximum likelihood and solve the estimation using the
+   Alternating Direction Method of Multipliers (ADMM) to provide high-dimensional mediator estimates.
+   To improve the sensitivity and specificity of non-zero mediators,
+   we offer the sure independence screening (SIS) function for dimension reduction.
+   The available penalty options include Lasso, Elastic Net, Pathway Lasso, and Network-constrained Penalty.
+   The methods employed in the package are based on Lasso (doi.org/10.1111/j.2517-6161.1996.tb02080.x),
+   Elastic Net (doi.org/10.1111/j.1467-9868.2005.00503.x), Pathway Lasso (10.4310/21-sii673),
+   Network Penalty (doi.org/10.1093/bioinformatics/btn081), ADMM (doi.org/10.1561/2200000016),
+   and SIS (doi.org/10.1111/j.1467-9868.2008.00674.x).
 License: MIT + file LICENSE
 Depends:
-    R (>= 4.0.0)
-Imports:
-    oneMKL,
-    oneMKL.MatrixCal,
-    mvtnorm, 
-    caret, 
-    dplyr
+  R (>= 4.0.0)
+Imports: 
+  Rcpp (>= 1.0.0)
+LinkingTo: 
+  Rcpp,
+  RcppEigen
 Suggests: 
-URL: https://github.com/R-HDMAADMM/HDMAADMM
-VignetteBuilder: knitr
+  RUnit, 
+  roxygen2
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
