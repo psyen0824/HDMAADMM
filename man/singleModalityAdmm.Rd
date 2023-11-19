@@ -16,11 +16,12 @@ singleModalityAdmm(
   lambda2b,
   penalty = "Network",
   penaltyParameterList,
+  SIS = FALSE,
+  SISThreshold = 2,
   maxIter = 3000,
   tol = 1e-04,
   verbose = FALSE,
-  debug = FALSE,
-  useCpp = FALSE
+  debug = FALSE
 )
 }
 \arguments{
@@ -36,56 +37,35 @@ singleModalityAdmm(
 
 \item{lambda1b}{The L1-norm penalty for the effect between mediator and dependent variable.}
 
-\item{lambda1g}{The L1-norm penalty for the direct effect. Default is "10" to adress overestimate issue.}
+\item{lambda1g}{The L1-norm penalty for the direct effect. Default is \strong{10} to adress overestimate issue.}
 
-\item{lambda2a}{The L2-norm penalty for the effect between mediator and independent variables.}
+\item{lambda2a}{The L2-norm penalty for the effect between mediator and independent variables. It's not used when Penalty is \code{Lasso} or \code{PathwayLasso}.}
 
-\item{lambda2b}{The L2-norm penalty for the effect between mediator and dependent variable.}
+\item{lambda2b}{The L2-norm penalty for the effect between mediator and dependent variable. It's not used when Penalty is \code{Lasso} or \code{PathwayLasso}.}
 
-\item{penalty}{A string to specify the penalty. Default is "Lasso". Possible methods are
-Lasso ("Lasso"), Elastic Net ("ElasticNet"), Pathway Lasso ("PathwayLasso"), and  Network-constrained Penalty ("Network").}
+\item{penalty}{A string to specify the penalty. Default is \code{Lasso}. Possible methods are
+Lasso (\code{Lasso}), Elastic Net (\code{ElasticNet}), Pathway Lasso (\code{PathwayLasso}), and  Network-constrained Penalty (\code{Network}).}
 
 \item{penaltyParameterList}{\itemize{
-\item Penalty='PasswayLasso' need two parameters.
+\item Penalty=\code{PasswayLasso} needs two parameters.
 \itemize{
 \item kappa The L1-norm penalty for pathway Lasso.
 \item nu The L2-norm penalty for pathway Lasso.
 }
-\item Penalty='Network' need one parameter.
+\item Penalty=\code{Network} needs one parameter.
 \itemize{
 \item L The network.
 }
-\item Penalty='Lasso' don't need other parameters.
-\item Penalty='ElasticNet' don't need other parameters.
+\item Penalty=\code{Lasso} or \code{ElasticNet} don't need other parameters.
 }}
-
-\item{verbose}{A logical value to specify whether to print the iteration process.}
-
-\item{debug}{A logical value to specify whether to print more iteration processes.}
-
-\item{alpha}{The initial value for the effect between mediator and independent variables.}
-
-\item{beta}{The initial value for the effect between mediator and dependent variable.}
-
-\item{gamma}{The initial value for the direct effect.}
-
-\item{tauAlpha}{The iteration parameter for ADMM - for the effect between mediator and independent variable.}
-
-\item{tauBeta}{The iteration parameter for ADMM - for the effect between mediator and depenent variable.}
 
 \item{SIS}{A logical value to specify whether to perform sure independence screening (SIS).}
 
 \item{SISThreshold}{The threshold value for the target reduced dimension for mediators. The default is "2," which reduces the dimension to 2*n/log(n).}
 
-\item{XtX}{Input the multiplication of matrices \code{X^(t)} and \code{X}, i.e., \verb{X^(t)X}.}
+\item{verbose}{A logical value to specify whether to print the iteration process.}
 
-\item{XtM1}{Input the multiplication of matrices \code{X^(t)} and \code{M1}, i.e., \verb{X^(t)M1}.}
-
-\item{M1tM1PlusRhoInv}{Input the matrix to estimate the effect between mediator and independned variables.}
-
-\item{M1tY}{Input the multiplication of matrices \code{M1^(t)} and \code{Y}, i.e., \verb{M_1^(t)Y}.}
-
-\item{XtY}{Input the multiplication of matrices \code{X^(t)} and \code{Y}, i.e., \verb{X^(t)Y}.}
+\item{debug}{A logical value to specify whether to allow to print more details of the iteration process.}
 }
 \value{
 A object, SingleModalityAdmm, with three elements.
@@ -100,7 +80,7 @@ High-dimensional Mediation Models with Pathway Lasso Penalty.
 }
 \examples{
 ## Generate Empirical Data
-simuData <- One_Modality_Mediation_Data_Gen_fixNonZero(
+simuData <- modalityMediationDataGen(
   n = 50, p = 100,
   parameters = list(
     sigmaY = 1,
@@ -114,7 +94,6 @@ simuData <- One_Modality_Mediation_Data_Gen_fixNonZero(
   trueValue = list(gamma = 3),
   seed = 20231201
 )
-
 
 ## Parameter Estimation
 model <- singleModalityAdmm(
