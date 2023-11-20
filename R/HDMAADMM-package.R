@@ -27,6 +27,7 @@
 #'
 #' @docType package
 #' @name HDMAADMM-package
+#' @useDynLib HDMAADMM
 #' @importFrom Rcpp evalCpp
 #' @importFrom RcppEigen RcppEigen.package.skeleton
 NULL

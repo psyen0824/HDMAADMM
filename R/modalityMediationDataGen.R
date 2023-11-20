@@ -44,32 +44,18 @@ rmvnorm <- function (n, mean = rep(0, nrow(sigma)), sigma = diag(length(mean))) 
 #'   \item Info : The output includes random seed and parameter setting for generating mediation model.
 #' }
 #' @examples
-#' simuData <- modalityMediationDataGen(
-#'   n = 50,
-#'   p = 100,
-#'   parameters = list(
-#'     sigmaY = 1,
-#'     sigmaM1 = diag(p),
-#'     sizeNonZero = c(3, 3, 4),
-#'     alphaMean = c(6, 4, 2),
-#'     alphaSd = c(0.1, 0.1, 0.1),
-#'     betaMean = c(6,4,2),
-#'     betaSd = c(0.1, 0.1, 0.1),
-#'     gamma = 3
-#'   ),
-#'   seed = 20231201
-#' )
+#' simuData <- modalityMediationDataGen(seed = 20231201)
 #' @export
 modalityMediationDataGen <- function(
-  n = 500, p = 50,
+  n = 100, p = 50,
   parameters = list(
     sigmaY = 1,
     sigmaM1 = diag(p),
     sizeNonZero = c(3, 3, 4),
     alphaMean = c(6, 4, 2),
     alphaSd = c(0.1, 0.1, 0.1),
-    tauMean = c(6,4,2),
-    tauSd = c(0.1, 0.1, 0.1)
+    betaMean = c(6,4,2),
+    betaSd = c(0.1, 0.1, 0.1)
   ),
   trueValue = list(gamma = 3),
   seed = 20231117
@@ -99,17 +85,17 @@ modalityMediationDataGen <- function(
     ),
     nrow = 1
   )
-  tau <- matrix(
+  beta <- matrix(
     c(
       unlist(mapply(
         function(n, m, s) rnorm(n, m, s),
-        parameters$sizeNonZero, parameters$tauMean, parameters$tauSd,
+        parameters$sizeNonZero, parameters$betaMean, parameters$betaSd,
         SIMPLIFY = FALSE
       )),
       rep(0, sum(parameters$sizeNonZero)),
       unlist(mapply(
         function(n, m, s) rnorm(n, m, s),
-        parameters$sizeNonZero, parameters$tauMean, parameters$tauSd,
+        parameters$sizeNonZero, parameters$betaMean, parameters$betaSd,
         SIMPLIFY = FALSE
       )),
       rep(0, p - 3*sum(parameters$sizeNonZero))
@@ -129,7 +115,7 @@ modalityMediationDataGen <- function(
   return(
     list(
       MediData = list(X = X, M1= M1,  Y=Y),
-      MediPara = list(alpha = alpha, tau = tau, gamma = gamma),
+      MediPara = list(alpha = alpha, beta = beta, gamma = gamma),
       Info = list(parameters = parameters, trueValue = trueValue, seed = seed)
     )
   )

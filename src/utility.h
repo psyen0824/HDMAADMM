@@ -1,9 +1,9 @@
-#include <Rcpp.h>
+#include <cstdlib>
 
-inline template <typename T> int sgn(T val) {
-  return (T(0) < val) - (val < T(0));
+inline int sgn(double val) {
+  return (val > 0.0) - (val < 0.0);
 }
 
 inline double softThreshold(double b, double lambda) {
-  return (abs(b) < lambda) ? 0.0 : sgn(b)*(abs(b) - lambda);
+  return (std::abs(b) < lambda) ? 0.0 : sgn(b)*(std::abs(b) - lambda);
 }

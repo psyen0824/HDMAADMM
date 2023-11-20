@@ -12,7 +12,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 #include <RcppEigen.h>
-#include <Rcpp.h>
 
 SEXP cast_numeric(SEXP input) {
   if (!Rf_isReal(input)) {
@@ -37,9 +36,7 @@ Eigen::MatrixXd fMatProd(SEXP X, SEXP Y, bool is_X_symmetric = false) {
   }
 
   Eigen::Map<Eigen::MatrixXd> XMtd = Rcpp::as<Eigen::Map<Eigen::MatrixXd>>(cast_numeric(X));
-  int *ydims;
-  ydims = INTEGER(Rf_coerceVector(Rf_getAttrib(Y, R_DimSymbol), INTSXP));
-  if (ydims[1] == 1) {
+  if (Rf_ncols(Y) == 1) {
     Eigen::Map<Eigen::VectorXd> b = Rcpp::as<Eigen::Map<Eigen::VectorXd>>(cast_numeric(Y));
     if (is_X_symmetric) {
       return XMtd.selfadjointView<Eigen::Lower>() * b;

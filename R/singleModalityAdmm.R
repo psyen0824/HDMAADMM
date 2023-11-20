@@ -21,13 +21,15 @@
 #' @param lambda1g The L1-norm penalty for the direct effect. Default is \strong{10} to adress overestimate issue.
 #' @param lambda1a The L1-norm penalty for the effect between mediator and independent variables.
 #' @param lambda1b The L1-norm penalty for the effect between mediator and dependent variable.
-#' @param lambda2a The L2-norm penalty for the effect between mediator and independent variables. It's not used when Penalty is \code{Lasso} or \code{PathwayLasso}.
-#' @param lambda2b The L2-norm penalty for the effect between mediator and dependent variable. It's not used when Penalty is \code{Lasso} or \code{PathwayLasso}.
-#' @param penalty A string to specify the penalty. Default is \code{Lasso}. Possible methods are
-#' Lasso (\code{Lasso}), Elastic Net (\code{ElasticNet}), Pathway Lasso (\code{PathwayLasso}), and  Network-constrained Penalty (\code{Network}).
+#' @param lambda2a The L2-norm penalty for the effect between mediator and independent variables.
+#'   It's not used when Penalty is \code{PathwayLasso}.
+#' @param lambda2b The L2-norm penalty for the effect between mediator and dependent variable.
+#'   It's not used when Penalty is \code{PathwayLasso}.
+#' @param penalty A string to specify the penalty. Default is \code{ElasticNet}. Possible methods are
+#' Elastic Net (\code{ElasticNet}), Pathway Lasso (\code{PathywayLasso}), and  Network-constrained Penalty (\code{Network}).
 #' @param penaltyParameterList
 #' \itemize{
-#'   \item Penalty=\code{PasswayLasso} needs two parameters.
+#'   \item Penalty=\code{PathwayLasso} needs two parameters.
 #'   \itemize{
 #'     \item kappa The L1-norm penalty for pathway Lasso.
 #'     \item nu The L2-norm penalty for pathway Lasso.
@@ -36,7 +38,7 @@
 #'   \itemize{
 #'     \item L The network.
 #'   }
-#'   \item Penalty=\code{Lasso} or \code{ElasticNet} don't need other parameters.
+#'   \item Penalty=\code{ElasticNet} don't need other parameters.
 #' }
 #' @return A object, SingleModalityAdmm, with three elements.
 #' \itemize{
@@ -54,33 +56,48 @@
 #' }
 #' @examples
 #' ## Generate Empirical Data
-#' simuData <- modalityMediationDataGen(
-#'   n = 50, p = 100,
-#'   parameters = list(
-#'     sigmaY = 1,
-#'     sigmaM1 = diag(p),
-#'     sizeNonZero = c(3, 3, 4),
-#'     alphaMean = c(6, 4, 2),
-#'     alphaSd = c(0.1, 0.1, 0.1),
-#'     tauMean = c(6,4,2),
-#'     tauSd = c(0.1, 0.1, 0.1)
-#'   ),
-#'   trueValue = list(gamma = 3),
-#'   seed = 20231201
+#' simuData <- modalityMediationDataGen(seed = 20231201)
+#'
+#' ## Parameter Estimation for Pathway Lasso penalty
+#' modelPathwayLasso <- singleModalityAdmm(
+#'   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
+#'   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
+#'   penalty = "PathwayLasso", penaltyParameterList = list(kappa = 1, nu = 2)
 #' )
 #'
-#' ## Parameter Estimation
-#' model <- singleModalityAdmm(
+#' ## Parameter Estimation for ElasticNet penalty
+#' modelElasticNet <- singleModalityAdmm(
 #'   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
-#'   rho = 1, lambda1g = 2, lambda1a = 1, lambda1b = 0.1, lambda2a = 1, lambda2b = 1,
-#'   penalty = "PathywayLasso", penaltyParameterList = list(kappa = 1, nu = 2),
-#'   SIS = FALSE, SIS_thre = 2
+#'   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
+#'   penalty = "ElasticNet"
+#' )
+#'
+#' ## Parameter Estimation for Network penalty
+#' p <- 50
+#' A <- matrix(rep(0, p*p), p, p)
+#' A[1:10, 1:10] <- 1
+#' A[1:10, 21:30] <- 1
+#' A[21:30, 21:30] <- 1
+#' A[21:30, 1:10] <- 1
+#' A[11:20, 11:20] <- 1
+#' A[11:20, 31:50] <- 1
+#' A[31:50, 31:50] <- 1
+#' A[31:50, 11:20] <- 1
+#' diag(A) <- 0
+#' d <- colSums(A)
+#' diagL <- 1 - rowSums(A) / d
+#' L <- -A / sqrt(d %o% d)
+#' diag(L) <- diagL
+#' modelNetwork <- singleModalityAdmm(
+#'   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
+#'   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
+#'   penalty = "Network", penaltyParameterList = list(L = L)
 #' )
 #' @export
 singleModalityAdmm <- function(
     X, Y, M1,
     rho=1, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
-    penalty = "Network", penaltyParameterList,
+    penalty = "ElasticNet", penaltyParameterList = list(),
     SIS = FALSE, SISThreshold = 2,
     maxIter=3000, tol=1e-4, verbose = FALSE, debug = FALSE
 ) {
@@ -117,12 +134,10 @@ singleModalityAdmm <- function(
     if (!("L" %in% names(penaltyParameterList))) {
       stop("penaltyParameterList should contains L for Network penalty")
     }
-  } else if (penalty == "PasswayLasso") {
+  } else if (penalty == "PathwayLasso") {
     if (!("kappa" %in% names(penaltyParameterList)) || !("nu" %in% names(penaltyParameterList))) {
-      stop("penaltyParameterList should contains kappa and nu for PasswayLasso penalty")
+      stop("penaltyParameterList should contains kappa and nu for PathwayLasso penalty")
     }
-  } else if (penalty == "Lasso") {
-    # do nothing
   } else if (penalty == "ElasticNet") {
     # do nothing
   } else {
@@ -130,7 +145,7 @@ singleModalityAdmm <- function(
   }
 
   iter <- 0L
-  estFunctionName <- sprintf("esstimate%s", penalty)
+  estFunctionName <- sprintf("estimate%s", penalty)
   commonArgs <- list(
     X=XX, Y=YY, M1=MM1, alpha=alphaEst, beta=betaEst, gamma=gammaEst, tauAlpha=tauAlphaEst, tauBeta=tauBetaEst,
     rho = rho, lambda1a=lambda1a, lambda1b=lambda1b, lambda1g=lambda1g, lambda2a=lambda2a, lambda2b=lambda2b,
@@ -201,15 +216,47 @@ singleModalityAdmm <- function(
     alpha = estRes$alpha * M1.scale / X.scale,
     beta = estRes$beta * Y.scale/M1.scale,
     gamma = estRes$gamma * Y.scale/X.scale,
-    tauAlpha = estRes$tauAlpha,
-    tauBeta = estRes$tauBeta,
     isConv = iter < maxIter,
     niter = iter
   )
 
-  out$interceptAlpha <- mean(M1) - fMatProd(matrix(X.center, nrow=1), out$alpha) * M1.scale / X.scale
-  out$interceptBeta <- Y.center - as.numeric(fMatAdd(fMatProd(matrix(X.center, nrow=1), out$gamma), fMatProd(fMatProd(matrix(X.center, nrow=1), out$alpha), out$beta)))
-  out$loglik <- getLogLikelihood(X, Y, M1, out$alpha, out$beta, matrix(out$gamma, 1, 1), out$interceptAlpha, out$interceptBeta)
+  out$interceptAlpha <- mean(M1) - fMatProd(matrix(X.center, nrow=1), out$alpha)
+  out$interceptBeta <- as.numeric(
+    Y.center - fMatProd(matrix(X.center, nrow=1), out$gamma) -
+      fMatProd(fMatProd(matrix(X.center, nrow=1), out$alpha), out$beta)
+  )
+  out$loglik <- getLogLikelihood(
+    X, Y, M1, out$alpha, out$beta, matrix(out$gamma, 1, 1), out$interceptAlpha, out$interceptBeta
+  )
+  M1Hat <- sweep(fMatProd(X, out$alpha), 2, out$interceptAlpha, `+`)
+  out$fitted <- out$interceptBeta + fMatProd(X, out$gamma) + fMatProd(M1Hat, out$beta)
+
   class(out) <- "SingleModalityAdmm"
   return(out)
+}
+
+#' Fitted Response of SingleModalityAdmm Fits
+#'
+#' @param object A fitted obejct of class inheriting from \code{SingleModalityAdmm}.
+#' @param ... further arguments passed to or from other methods.
+#' @method fitted SingleModalityAdmm
+#' @importFrom stats fitted
+#' @export
+fitted.milr <- function(object, ...) {
+  return(out$fitted)
+}
+
+#' Predict Method for SingleModalityAdmm Fits
+#'
+#' @param object A fitted obejct of class inheriting from \code{SingleModalityAdmm}.
+#' @param newdata Default is \code{NULL}. A matrix with variables to predict.
+#' @param ... further arguments passed to or from other methods.
+#' @method predict SingleModalityAdmm
+#' @importFrom stats predict
+#' @export
+predict.SingleModalityAdmm <- function(object, newdata) {
+  if (is.null(newdata))
+    return(fitted(object))
+  M1Hat <- sweep(fMatProd(newdata, object$alpha), 2, object$interceptAlpha, `+`)
+  return(object$interceptBeta + fMatProd(newdata, object$gamma) + fMatProd(M1Hat, object$beta))
 }

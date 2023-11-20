@@ -5,8 +5,8 @@
 \title{Data Generation for High-Dimensional Mediation Model}
 \usage{
 modalityMediationDataGen(
-  n = 500,
-  p = 50,
+  n = 100,
+  p = 500,
   parameters = list(sigmaY = 1, sigmaM1 = diag(p), sizeNonZero = c(3, 3, 4), alphaMean =
     c(6, 4, 2), alphaSd = c(0.1, 0.1, 0.1), tauMean = c(6, 4, 2), tauSd = c(0.1, 0.1,
     0.1)),
@@ -45,19 +45,5 @@ A gen_data object with three elements.
 Data Generation for High-Dimensional Mediation Model
 }
 \examples{
-simuData <- modalityMediationDataGen(
-  n = 50,
-  p = 100,
-  parameters = list(
-    sigmaY = 1,
-    sigmaM1 = diag(p),
-    sizeNonZero = c(3, 3, 4),
-    alphaMean = c(6, 4, 2),
-    alphaSd = c(0.1, 0.1, 0.1),
-    betaMean = c(6,4,2),
-    betaSd = c(0.1, 0.1, 0.1),
-    gamma = 3
-  ),
-  seed = 20231201
-)
+simuData <- modalityMediationDataGen(seed = 20231201)
 }

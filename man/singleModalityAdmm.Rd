@@ -44,10 +44,10 @@ singleModalityAdmm(
 \item{lambda2b}{The L2-norm penalty for the effect between mediator and dependent variable. It's not used when Penalty is \code{Lasso} or \code{PathwayLasso}.}
 
 \item{penalty}{A string to specify the penalty. Default is \code{Lasso}. Possible methods are
-Lasso (\code{Lasso}), Elastic Net (\code{ElasticNet}), Pathway Lasso (\code{PathwayLasso}), and  Network-constrained Penalty (\code{Network}).}
+Lasso (\code{Lasso}), Elastic Net (\code{ElasticNet}), Pathway Lasso (\code{PathywayLasso}), and  Network-constrained Penalty (\code{Network}).}
 
 \item{penaltyParameterList}{\itemize{
-\item Penalty=\code{PasswayLasso} needs two parameters.
+\item Penalty=\code{PathwayLasso} needs two parameters.
 \itemize{
 \item kappa The L1-norm penalty for pathway Lasso.
 \item nu The L2-norm penalty for pathway Lasso.
@@ -80,27 +80,14 @@ High-dimensional Mediation Models with Pathway Lasso Penalty.
 }
 \examples{
 ## Generate Empirical Data
-simuData <- modalityMediationDataGen(
-  n = 50, p = 100,
-  parameters = list(
-    sigmaY = 1,
-    sigmaM1 = diag(p),
-    sizeNonZero = c(3, 3, 4),
-    alphaMean = c(6, 4, 2),
-    alphaSd = c(0.1, 0.1, 0.1),
-    tauMean = c(6,4,2),
-    tauSd = c(0.1, 0.1, 0.1)
-  ),
-  trueValue = list(gamma = 3),
-  seed = 20231201
-)
+simuData <- modalityMediationDataGen(seed = 20231201)
 
 ## Parameter Estimation
 model <- singleModalityAdmm(
   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
   rho = 1, lambda1g = 2, lambda1a = 1, lambda1b = 0.1, lambda2a = 1, lambda2b = 1,
-  penalty = "PathywayLasso", penaltyParameterList = list(kappa = 1, nu = 2),
-  SIS = FALSE, SIS_thre = 2
+  penalty = "PathwayLasso", penaltyParameterList = list(kappa = 1, nu = 2),
+  SIS = FALSE, SISThreshold = 2
 )
 }
 \references{
