@@ -243,7 +243,7 @@ singleModalityAdmm <- function(
 #' @importFrom stats fitted
 #' @export
 fitted.SingleModalityAdmm <- function(object, ...) {
-  return(out$fitted)
+  return(object$fitted)
 }
 
 #' Predict Method for SingleModalityAdmm Fits
