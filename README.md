@@ -40,6 +40,6 @@ modelElasticNet <- singleModalityAdmm(
   penalty = "ElasticNet"
 )
 
-fitted(modelElasticNet)                        # fitted values
+fitted(modelElasticNet)                              # fitted values
 predict(modelElasticNet, matrix(c(0, 1), ncol = 1))  # predict values
 ```
