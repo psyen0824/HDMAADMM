@@ -1,4 +1,4 @@
-#include <RcppEigen.h>
+#include <oneMKL.h>
 #include <iostream>
 
 inline int sgn(double val) {

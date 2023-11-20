@@ -34,4 +34,5 @@
 #' @useDynLib HDMAADMM
 #' @importFrom Rcpp evalCpp
 #' @importFrom RcppEigen RcppEigen.package.skeleton
+#' @importFrom oneMKL onemklIncFlags onemklLibFlags
 NULL
