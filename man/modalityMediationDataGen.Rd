@@ -6,9 +6,9 @@
 \usage{
 modalityMediationDataGen(
   n = 100,
-  p = 500,
+  p = 50,
   parameters = list(sigmaY = 1, sigmaM1 = diag(p), sizeNonZero = c(3, 3, 4), alphaMean =
-    c(6, 4, 2), alphaSd = c(0.1, 0.1, 0.1), tauMean = c(6, 4, 2), tauSd = c(0.1, 0.1,
+    c(6, 4, 2), alphaSd = c(0.1, 0.1, 0.1), betaMean = c(6, 4, 2), betaSd = c(0.1, 0.1,
     0.1)),
   trueValue = list(gamma = 3),
   seed = 20231117

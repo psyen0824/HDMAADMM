@@ -37,5 +37,7 @@ Suggests:
   RUnit, 
   roxygen2
 Encoding: UTF-8
+URL: https://github.com/psyen0824/HDMAADMM
+BugReports: https://github.com/psyen0824/HDMAADMM/issues
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3

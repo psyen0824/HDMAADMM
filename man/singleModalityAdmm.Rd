@@ -14,8 +14,8 @@ singleModalityAdmm(
   lambda1g,
   lambda2a,
   lambda2b,
-  penalty = "Network",
-  penaltyParameterList,
+  penalty = "ElasticNet",
+  penaltyParameterList = list(),
   SIS = FALSE,
   SISThreshold = 2,
   maxIter = 3000,
@@ -39,12 +39,14 @@ singleModalityAdmm(
 
 \item{lambda1g}{The L1-norm penalty for the direct effect. Default is \strong{10} to adress overestimate issue.}
 
-\item{lambda2a}{The L2-norm penalty for the effect between mediator and independent variables. It's not used when Penalty is \code{Lasso} or \code{PathwayLasso}.}
+\item{lambda2a}{The L2-norm penalty for the effect between mediator and independent variables.
+It's not used when Penalty is \code{PathwayLasso}.}
 
-\item{lambda2b}{The L2-norm penalty for the effect between mediator and dependent variable. It's not used when Penalty is \code{Lasso} or \code{PathwayLasso}.}
+\item{lambda2b}{The L2-norm penalty for the effect between mediator and dependent variable.
+It's not used when Penalty is \code{PathwayLasso}.}
 
-\item{penalty}{A string to specify the penalty. Default is \code{Lasso}. Possible methods are
-Lasso (\code{Lasso}), Elastic Net (\code{ElasticNet}), Pathway Lasso (\code{PathywayLasso}), and  Network-constrained Penalty (\code{Network}).}
+\item{penalty}{A string to specify the penalty. Default is \code{ElasticNet}. Possible methods are
+Elastic Net (\code{ElasticNet}), Pathway Lasso (\code{PathywayLasso}), and  Network-constrained Penalty (\code{Network}).}
 
 \item{penaltyParameterList}{\itemize{
 \item Penalty=\code{PathwayLasso} needs two parameters.
@@ -56,7 +58,7 @@ Lasso (\code{Lasso}), Elastic Net (\code{ElasticNet}), Pathway Lasso (\code{Path
 \itemize{
 \item L The network.
 }
-\item Penalty=\code{Lasso} or \code{ElasticNet} don't need other parameters.
+\item Penalty=\code{ElasticNet} don't need other parameters.
 }}
 
 \item{SIS}{A logical value to specify whether to perform sure independence screening (SIS).}
@@ -82,12 +84,40 @@ High-dimensional Mediation Models with Pathway Lasso Penalty.
 ## Generate Empirical Data
 simuData <- modalityMediationDataGen(seed = 20231201)
 
-## Parameter Estimation
-model <- singleModalityAdmm(
+## Parameter Estimation for Pathway Lasso penalty
+modelPathwayLasso <- singleModalityAdmm(
   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
-  rho = 1, lambda1g = 2, lambda1a = 1, lambda1b = 0.1, lambda2a = 1, lambda2b = 1,
-  penalty = "PathwayLasso", penaltyParameterList = list(kappa = 1, nu = 2),
-  SIS = FALSE, SISThreshold = 2
+  rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
+  penalty = "PathwayLasso", penaltyParameterList = list(kappa = 1, nu = 2)
+)
+
+## Parameter Estimation for ElasticNet penalty
+modelElasticNet <- singleModalityAdmm(
+  X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
+  rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
+  penalty = "ElasticNet"
+)
+
+## Parameter Estimation for Network penalty
+p <- 50
+A <- matrix(rep(0, p*p), p, p)
+A[1:10, 1:10] <- 1
+A[1:10, 21:30] <- 1
+A[21:30, 21:30] <- 1
+A[21:30, 1:10] <- 1
+A[11:20, 11:20] <- 1
+A[11:20, 31:50] <- 1
+A[31:50, 31:50] <- 1
+A[31:50, 11:20] <- 1
+diag(A) <- 0
+d <- colSums(A)
+diagL <- 1 - rowSums(A) / d
+L <- -A / sqrt(d \%o\% d)
+diag(L) <- diagL
+modelNetwork <- singleModalityAdmm(
+  X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
+  rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
+  penalty = "Network", penaltyParameterList = list(L = L)
 )
 }
 \references{

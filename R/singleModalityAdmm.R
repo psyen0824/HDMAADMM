@@ -58,18 +58,18 @@
 #' ## Generate Empirical Data
 #' simuData <- modalityMediationDataGen(seed = 20231201)
 #'
-#' ## Parameter Estimation for Pathway Lasso penalty
-#' modelPathwayLasso <- singleModalityAdmm(
-#'   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
-#'   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
-#'   penalty = "PathwayLasso", penaltyParameterList = list(kappa = 1, nu = 2)
-#' )
-#'
 #' ## Parameter Estimation for ElasticNet penalty
 #' modelElasticNet <- singleModalityAdmm(
 #'   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
 #'   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
 #'   penalty = "ElasticNet"
+#' )
+#'
+#' ## Parameter Estimation for Pathway Lasso penalty
+#' modelPathwayLasso <- singleModalityAdmm(
+#'   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
+#'   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
+#'   penalty = "PathwayLasso", penaltyParameterList = list(kappa = 1, nu = 2)
 #' )
 #'
 #' ## Parameter Estimation for Network penalty
@@ -242,7 +242,7 @@ singleModalityAdmm <- function(
 #' @method fitted SingleModalityAdmm
 #' @importFrom stats fitted
 #' @export
-fitted.milr <- function(object, ...) {
+fitted.SingleModalityAdmm <- function(object, ...) {
   return(out$fitted)
 }
 
