@@ -84,18 +84,18 @@ High-dimensional Mediation Models with Pathway Lasso Penalty.
 ## Generate Empirical Data
 simuData <- modalityMediationDataGen(seed = 20231201)
 
-## Parameter Estimation for Pathway Lasso penalty
-modelPathwayLasso <- singleModalityAdmm(
-  X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
-  rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
-  penalty = "PathwayLasso", penaltyParameterList = list(kappa = 1, nu = 2)
-)
-
 ## Parameter Estimation for ElasticNet penalty
 modelElasticNet <- singleModalityAdmm(
   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
   penalty = "ElasticNet"
+)
+
+## Parameter Estimation for Pathway Lasso penalty
+modelPathwayLasso <- singleModalityAdmm(
+  X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
+  rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
+  penalty = "PathwayLasso", penaltyParameterList = list(kappa = 1, nu = 2)
 )
 
 ## Parameter Estimation for Network penalty
@@ -119,6 +119,10 @@ modelNetwork <- singleModalityAdmm(
   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
   penalty = "Network", penaltyParameterList = list(L = L)
 )
+
+# fitted & predict
+fitted(modelElasticNet)
+predict(modelElasticNet, matrix(c(0, 1), ncol=1))
 }
 \references{
 \enumerate{

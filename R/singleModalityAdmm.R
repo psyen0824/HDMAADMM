@@ -93,6 +93,10 @@
 #'   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
 #'   penalty = "Network", penaltyParameterList = list(L = L)
 #' )
+#'
+#' # fitted & predict
+#' fitted(modelElasticNet)
+#' predict(modelElasticNet, matrix(c(0, 1), ncol=1))
 #' @export
 singleModalityAdmm <- function(
     X, Y, M1,
