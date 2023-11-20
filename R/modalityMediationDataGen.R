@@ -110,7 +110,7 @@ modalityMediationDataGen <- function(
   M1 <- X %*% alpha + rmvnorm(n = n, mean = rep(0, p), sigma = parameters$sigmaM1)
 
   # Y = Continuous Outcome Response
-  Y <- X %*% gamma + M1 %*% tau + rnorm(n = n, mean = 0, sd = parameters$sigmaY)
+  Y <- X %*% gamma + M1 %*% beta + rnorm(n = n, mean = 0, sd = parameters$sigmaY)
 
   return(
     list(
