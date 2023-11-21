@@ -12,8 +12,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // estimateElasticNet
-Rcpp::List estimateElasticNet(Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> Y, Eigen::Map<Eigen::MatrixXd> M1, Eigen::Map<Eigen::MatrixXd> alpha, Eigen::Map<Eigen::MatrixXd> beta, Eigen::Map<Eigen::MatrixXd> gamma, Eigen::Map<Eigen::MatrixXd> tauAlpha, Eigen::Map<Eigen::MatrixXd> tauBeta, double rho, double lambda1a, double lambda1b, double lambda1g, double lambda2a, double lambda2b, Eigen::Map<Eigen::MatrixXd> XtX, Eigen::Map<Eigen::MatrixXd> XtM1, Eigen::Map<Eigen::MatrixXd> M1tM1PlusRhoInv, Eigen::Map<Eigen::MatrixXd> M1tY, Eigen::Map<Eigen::MatrixXd> XtY);
-RcppExport SEXP _HDMAADMM_estimateElasticNet(SEXP XSEXP, SEXP YSEXP, SEXP M1SEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP tauAlphaSEXP, SEXP tauBetaSEXP, SEXP rhoSEXP, SEXP lambda1aSEXP, SEXP lambda1bSEXP, SEXP lambda1gSEXP, SEXP lambda2aSEXP, SEXP lambda2bSEXP, SEXP XtXSEXP, SEXP XtM1SEXP, SEXP M1tM1PlusRhoInvSEXP, SEXP M1tYSEXP, SEXP XtYSEXP) {
+Rcpp::List estimateElasticNet(Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> Y, Eigen::Map<Eigen::MatrixXd> M1, Eigen::Map<Eigen::MatrixXd> alpha, Eigen::Map<Eigen::MatrixXd> beta, Eigen::Map<Eigen::MatrixXd> gamma, Eigen::Map<Eigen::MatrixXd> tauAlpha, Eigen::Map<Eigen::MatrixXd> tauBeta, double rho, double lambda1a, double lambda1b, double lambda1g, double lambda2a, double lambda2b, Eigen::Map<Eigen::MatrixXd> XtX, Eigen::Map<Eigen::MatrixXd> XtXPlusRhoInv, Eigen::Map<Eigen::MatrixXd> XtM1, Eigen::Map<Eigen::MatrixXd> M1tM1PlusRhoInv, Eigen::Map<Eigen::MatrixXd> M1tY, Eigen::Map<Eigen::MatrixXd> XtY);
+RcppExport SEXP _HDMAADMM_estimateElasticNet(SEXP XSEXP, SEXP YSEXP, SEXP M1SEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP tauAlphaSEXP, SEXP tauBetaSEXP, SEXP rhoSEXP, SEXP lambda1aSEXP, SEXP lambda1bSEXP, SEXP lambda1gSEXP, SEXP lambda2aSEXP, SEXP lambda2bSEXP, SEXP XtXSEXP, SEXP XtXPlusRhoInvSEXP, SEXP XtM1SEXP, SEXP M1tM1PlusRhoInvSEXP, SEXP M1tYSEXP, SEXP XtYSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -32,17 +32,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type lambda2a(lambda2aSEXP);
     Rcpp::traits::input_parameter< double >::type lambda2b(lambda2bSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type XtX(XtXSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type XtXPlusRhoInv(XtXPlusRhoInvSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type XtM1(XtM1SEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type M1tM1PlusRhoInv(M1tM1PlusRhoInvSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type M1tY(M1tYSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type XtY(XtYSEXP);
-    rcpp_result_gen = Rcpp::wrap(estimateElasticNet(X, Y, M1, alpha, beta, gamma, tauAlpha, tauBeta, rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b, XtX, XtM1, M1tM1PlusRhoInv, M1tY, XtY));
+    rcpp_result_gen = Rcpp::wrap(estimateElasticNet(X, Y, M1, alpha, beta, gamma, tauAlpha, tauBeta, rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b, XtX, XtXPlusRhoInv, XtM1, M1tM1PlusRhoInv, M1tY, XtY));
     return rcpp_result_gen;
 END_RCPP
 }
 // estimateNetwork
-Rcpp::List estimateNetwork(Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> Y, Eigen::Map<Eigen::MatrixXd> M1, Eigen::Map<Eigen::MatrixXd> alpha, Eigen::Map<Eigen::MatrixXd> beta, Eigen::Map<Eigen::MatrixXd> gamma, Eigen::Map<Eigen::MatrixXd> tauAlpha, Eigen::Map<Eigen::MatrixXd> tauBeta, double rho, double lambda1a, double lambda1b, double lambda1g, double lambda2a, double lambda2b, Eigen::Map<Eigen::MatrixXd> XtX, Eigen::Map<Eigen::MatrixXd> XtM1, Eigen::Map<Eigen::MatrixXd> M1tM1PlusRhoInv, Eigen::Map<Eigen::MatrixXd> M1tY, Eigen::Map<Eigen::MatrixXd> XtY, Eigen::Map<Eigen::MatrixXd> L);
-RcppExport SEXP _HDMAADMM_estimateNetwork(SEXP XSEXP, SEXP YSEXP, SEXP M1SEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP tauAlphaSEXP, SEXP tauBetaSEXP, SEXP rhoSEXP, SEXP lambda1aSEXP, SEXP lambda1bSEXP, SEXP lambda1gSEXP, SEXP lambda2aSEXP, SEXP lambda2bSEXP, SEXP XtXSEXP, SEXP XtM1SEXP, SEXP M1tM1PlusRhoInvSEXP, SEXP M1tYSEXP, SEXP XtYSEXP, SEXP LSEXP) {
+Rcpp::List estimateNetwork(Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> Y, Eigen::Map<Eigen::MatrixXd> M1, Eigen::Map<Eigen::MatrixXd> alpha, Eigen::Map<Eigen::MatrixXd> beta, Eigen::Map<Eigen::MatrixXd> gamma, Eigen::Map<Eigen::MatrixXd> tauAlpha, Eigen::Map<Eigen::MatrixXd> tauBeta, double rho, double lambda1a, double lambda1b, double lambda1g, double lambda2a, double lambda2b, Eigen::Map<Eigen::MatrixXd> XtX, Eigen::Map<Eigen::MatrixXd> XtXPlusRhoInv, Eigen::Map<Eigen::MatrixXd> XtM1, Eigen::Map<Eigen::MatrixXd> M1tM1PlusRhoInv, Eigen::Map<Eigen::MatrixXd> M1tY, Eigen::Map<Eigen::MatrixXd> XtY, Eigen::Map<Eigen::MatrixXd> L);
+RcppExport SEXP _HDMAADMM_estimateNetwork(SEXP XSEXP, SEXP YSEXP, SEXP M1SEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP tauAlphaSEXP, SEXP tauBetaSEXP, SEXP rhoSEXP, SEXP lambda1aSEXP, SEXP lambda1bSEXP, SEXP lambda1gSEXP, SEXP lambda2aSEXP, SEXP lambda2bSEXP, SEXP XtXSEXP, SEXP XtXPlusRhoInvSEXP, SEXP XtM1SEXP, SEXP M1tM1PlusRhoInvSEXP, SEXP M1tYSEXP, SEXP XtYSEXP, SEXP LSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -61,18 +62,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type lambda2a(lambda2aSEXP);
     Rcpp::traits::input_parameter< double >::type lambda2b(lambda2bSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type XtX(XtXSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type XtXPlusRhoInv(XtXPlusRhoInvSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type XtM1(XtM1SEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type M1tM1PlusRhoInv(M1tM1PlusRhoInvSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type M1tY(M1tYSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type XtY(XtYSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type L(LSEXP);
-    rcpp_result_gen = Rcpp::wrap(estimateNetwork(X, Y, M1, alpha, beta, gamma, tauAlpha, tauBeta, rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b, XtX, XtM1, M1tM1PlusRhoInv, M1tY, XtY, L));
+    rcpp_result_gen = Rcpp::wrap(estimateNetwork(X, Y, M1, alpha, beta, gamma, tauAlpha, tauBeta, rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b, XtX, XtXPlusRhoInv, XtM1, M1tM1PlusRhoInv, M1tY, XtY, L));
     return rcpp_result_gen;
 END_RCPP
 }
 // estimatePathwayLasso
-Rcpp::List estimatePathwayLasso(Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> Y, Eigen::Map<Eigen::MatrixXd> M1, Eigen::Map<Eigen::MatrixXd> alpha, Eigen::Map<Eigen::MatrixXd> beta, Eigen::Map<Eigen::MatrixXd> gamma, Eigen::Map<Eigen::MatrixXd> tauAlpha, Eigen::Map<Eigen::MatrixXd> tauBeta, double rho, double lambda1a, double lambda1b, double lambda1g, double lambda2a, double lambda2b, Eigen::Map<Eigen::MatrixXd> XtX, Eigen::Map<Eigen::MatrixXd> XtM1, Eigen::Map<Eigen::MatrixXd> M1tM1PlusRhoInv, Eigen::Map<Eigen::MatrixXd> M1tY, Eigen::Map<Eigen::MatrixXd> XtY, double kappa, double nu);
-RcppExport SEXP _HDMAADMM_estimatePathwayLasso(SEXP XSEXP, SEXP YSEXP, SEXP M1SEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP tauAlphaSEXP, SEXP tauBetaSEXP, SEXP rhoSEXP, SEXP lambda1aSEXP, SEXP lambda1bSEXP, SEXP lambda1gSEXP, SEXP lambda2aSEXP, SEXP lambda2bSEXP, SEXP XtXSEXP, SEXP XtM1SEXP, SEXP M1tM1PlusRhoInvSEXP, SEXP M1tYSEXP, SEXP XtYSEXP, SEXP kappaSEXP, SEXP nuSEXP) {
+Rcpp::List estimatePathwayLasso(Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> Y, Eigen::Map<Eigen::MatrixXd> M1, Eigen::Map<Eigen::MatrixXd> alpha, Eigen::Map<Eigen::MatrixXd> beta, Eigen::Map<Eigen::MatrixXd> gamma, Eigen::Map<Eigen::MatrixXd> tauAlpha, Eigen::Map<Eigen::MatrixXd> tauBeta, double rho, double lambda1a, double lambda1b, double lambda1g, double lambda2a, double lambda2b, Eigen::Map<Eigen::MatrixXd> XtX, Eigen::Map<Eigen::MatrixXd> XtXPlusRhoInv, Eigen::Map<Eigen::MatrixXd> XtM1, Eigen::Map<Eigen::MatrixXd> M1tM1PlusRhoInv, Eigen::Map<Eigen::MatrixXd> M1tY, Eigen::Map<Eigen::MatrixXd> XtY, double kappa, double nu);
+RcppExport SEXP _HDMAADMM_estimatePathwayLasso(SEXP XSEXP, SEXP YSEXP, SEXP M1SEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP tauAlphaSEXP, SEXP tauBetaSEXP, SEXP rhoSEXP, SEXP lambda1aSEXP, SEXP lambda1bSEXP, SEXP lambda1gSEXP, SEXP lambda2aSEXP, SEXP lambda2bSEXP, SEXP XtXSEXP, SEXP XtXPlusRhoInvSEXP, SEXP XtM1SEXP, SEXP M1tM1PlusRhoInvSEXP, SEXP M1tYSEXP, SEXP XtYSEXP, SEXP kappaSEXP, SEXP nuSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -91,13 +93,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type lambda2a(lambda2aSEXP);
     Rcpp::traits::input_parameter< double >::type lambda2b(lambda2bSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type XtX(XtXSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type XtXPlusRhoInv(XtXPlusRhoInvSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type XtM1(XtM1SEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type M1tM1PlusRhoInv(M1tM1PlusRhoInvSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type M1tY(M1tYSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type XtY(XtYSEXP);
     Rcpp::traits::input_parameter< double >::type kappa(kappaSEXP);
     Rcpp::traits::input_parameter< double >::type nu(nuSEXP);
-    rcpp_result_gen = Rcpp::wrap(estimatePathwayLasso(X, Y, M1, alpha, beta, gamma, tauAlpha, tauBeta, rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b, XtX, XtM1, M1tM1PlusRhoInv, M1tY, XtY, kappa, nu));
+    rcpp_result_gen = Rcpp::wrap(estimatePathwayLasso(X, Y, M1, alpha, beta, gamma, tauAlpha, tauBeta, rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b, XtX, XtXPlusRhoInv, XtM1, M1tM1PlusRhoInv, M1tY, XtY, kappa, nu));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -127,20 +130,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// fMatSolve
-Eigen::MatrixXd fMatSolve(SEXP X, SEXP Y, bool is_sym_pd, bool is_invertible);
-RcppExport SEXP _HDMAADMM_fMatSolve(SEXP XSEXP, SEXP YSEXP, SEXP is_sym_pdSEXP, SEXP is_invertibleSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< SEXP >::type X(XSEXP);
-    Rcpp::traits::input_parameter< SEXP >::type Y(YSEXP);
-    Rcpp::traits::input_parameter< bool >::type is_sym_pd(is_sym_pdSEXP);
-    Rcpp::traits::input_parameter< bool >::type is_invertible(is_invertibleSEXP);
-    rcpp_result_gen = Rcpp::wrap(fMatSolve(X, Y, is_sym_pd, is_invertible));
-    return rcpp_result_gen;
-END_RCPP
-}
 // fMatInv
 Eigen::MatrixXd fMatInv(SEXP X, bool is_sym_pd);
 RcppExport SEXP _HDMAADMM_fMatInv(SEXP XSEXP, SEXP is_sym_pdSEXP) {
@@ -166,12 +155,11 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_HDMAADMM_estimateElasticNet", (DL_FUNC) &_HDMAADMM_estimateElasticNet, 19},
-    {"_HDMAADMM_estimateNetwork", (DL_FUNC) &_HDMAADMM_estimateNetwork, 20},
-    {"_HDMAADMM_estimatePathwayLasso", (DL_FUNC) &_HDMAADMM_estimatePathwayLasso, 21},
+    {"_HDMAADMM_estimateElasticNet", (DL_FUNC) &_HDMAADMM_estimateElasticNet, 20},
+    {"_HDMAADMM_estimateNetwork", (DL_FUNC) &_HDMAADMM_estimateNetwork, 21},
+    {"_HDMAADMM_estimatePathwayLasso", (DL_FUNC) &_HDMAADMM_estimatePathwayLasso, 22},
     {"_HDMAADMM_fMatProd", (DL_FUNC) &_HDMAADMM_fMatProd, 3},
     {"_HDMAADMM_fMatTransProd", (DL_FUNC) &_HDMAADMM_fMatTransProd, 3},
-    {"_HDMAADMM_fMatSolve", (DL_FUNC) &_HDMAADMM_fMatSolve, 4},
     {"_HDMAADMM_fMatInv", (DL_FUNC) &_HDMAADMM_fMatInv, 2},
     {"_HDMAADMM_fMatChol", (DL_FUNC) &_HDMAADMM_fMatChol, 1},
     {NULL, NULL, 0}

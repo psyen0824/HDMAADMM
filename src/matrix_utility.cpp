@@ -89,39 +89,6 @@ Eigen::MatrixXd fMatTransProd(SEXP X, SEXP Y, bool is_X_symmetric = false) {
 }
 
 // [[Rcpp::export]]
-Eigen::MatrixXd fMatSolve(
-    SEXP X, SEXP Y,
-    bool is_sym_pd = false,
-    bool is_invertible = false
-) {
-  if (!(Rf_isMatrix(X) && (TYPEOF(X) == REALSXP || TYPEOF(X) == INTSXP || TYPEOF(X) == LGLSXP))) {
-    Rcpp::stop("'X' must be a numeric matrix");
-  }
-
-  if (!(Rf_isMatrix(Y) && (TYPEOF(Y) == REALSXP || TYPEOF(Y) == INTSXP || TYPEOF(Y) == LGLSXP))) {
-    Rcpp::stop("'Y' must be a numeric matrix");
-  }
-
-  if (Rf_nrows(X) != Rf_ncols(X)) {
-    Rcpp::stop("X must be a square matrix");
-  }
-
-  if (Rf_nrows(X) != Rf_nrows(Y)) {
-    Rcpp::stop("The number of rows of Y must be equal to the number of columns/rows of X");
-  }
-
-  Eigen::Map<Eigen::MatrixXd> XMtd = Rcpp::as<Eigen::Map<Eigen::MatrixXd>>(cast_numeric(X));
-  Eigen::Map<Eigen::MatrixXd> YMtd = Rcpp::as<Eigen::Map<Eigen::MatrixXd>>(cast_numeric(Y));
-  if (is_sym_pd) {
-    return XMtd.llt().solve(YMtd);
-  } else if (is_invertible) {
-    return XMtd.partialPivLu().solve(YMtd);
-  } else {
-    return XMtd.householderQr().solve(YMtd);
-  }
-}
-
-// [[Rcpp::export]]
 Eigen::MatrixXd fMatInv(SEXP X, bool is_sym_pd = false) {
   if (!(Rf_isMatrix(X) && (TYPEOF(X) == REALSXP || TYPEOF(X) == INTSXP || TYPEOF(X) == LGLSXP))) {
     Rcpp::stop("'X' must be a numeric matrix");

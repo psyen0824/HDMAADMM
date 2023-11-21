@@ -141,17 +141,17 @@ singleModalityAdmm <- function(
   preCalcValues <- list(
     XtX = fMatTransProd(XX, XX),
     XtM1 = fMatTransProd(XX, MM1),
-    M1tM1PlusRhoInv = fMatInv(fMatTransProd(MM1, MM1) + rho*diag(p)),
+    M1tM1PlusRhoInv = fMatInv(fMatTransProd(MM1, MM1) + rho*diag(p), TRUE),
     M1tY = fMatTransProd(MM1, YY),
     XtY = fMatTransProd(XX, YY)
   )
+  preCalcValues$XtXPlusRhoInv <- fMatInv(preCalcValues$XtX + rho*diag(ncol(XX)), TRUE)
 
   gammaEst <- matrix(coef(lm(YY~XX+MM1))[2:(2+ncol(X)-1)], ncol=1)
   alphaEst <- coef(lm(MM1~XX))[2, , drop=FALSE]
   betaEst <- matrix(sapply(1:p, function(i) coef(lm(YY~XX+MM1[,i]))[3]), ncol=1)
   tauAlphaEst <- matrix(rep(0, p), nrow=1)
   tauBetaEst <- matrix(rep(0, p), ncol=1)
-
 
   if (penalty == "Network") {
     if (!("L" %in% names(penaltyParameterList))) {
@@ -172,7 +172,8 @@ singleModalityAdmm <- function(
   commonArgs <- list(
     X=XX, Y=YY, M1=MM1, alpha=alphaEst, beta=betaEst, gamma=gammaEst, tauAlpha=tauAlphaEst, tauBeta=tauBetaEst,
     rho = rho, lambda1a=lambda1a, lambda1b=lambda1b, lambda1g=lambda1g, lambda2a=lambda2a, lambda2b=lambda2b,
-    XtX=preCalcValues$XtX, XtM1=preCalcValues$XtM1, M1tM1PlusRhoInv=preCalcValues$M1tM1PlusRhoInv, M1tY=preCalcValues$M1tY, XtY=preCalcValues$XtY
+    XtX=preCalcValues$XtX, XtXPlusRhoInv = preCalcValues$XtXPlusRhoInv, XtM1=preCalcValues$XtM1,
+    M1tM1PlusRhoInv=preCalcValues$M1tM1PlusRhoInv, M1tY=preCalcValues$M1tY, XtY=preCalcValues$XtY
   )
   estRes <- do.call(estFunctionName, c(commonArgs, penaltyParameterList))
 
@@ -201,7 +202,8 @@ singleModalityAdmm <- function(
     commonArgs <- list(
       X=XX, Y=YY, M1=MM1, alpha=estRes$alpha, beta=estRes$beta, gamma=estRes$gamma, tauAlpha=estRes$tauAlpha, tauBeta=estRes$tauBeta,
       rho = rho, lambda1a=lambda1a, lambda1b=lambda1b, lambda1g=lambda1g, lambda2a=lambda2a, lambda2b=lambda2b,
-      XtX=preCalcValues$XtX, XtM1=preCalcValues$XtM1, M1tM1PlusRhoInv=preCalcValues$M1tM1PlusRhoInv, M1tY=preCalcValues$M1tY, XtY=preCalcValues$XtY
+      XtX=preCalcValues$XtX, XtXPlusRhoInv = preCalcValues$XtXPlusRhoInv, XtM1=preCalcValues$XtM1,
+      M1tM1PlusRhoInv=preCalcValues$M1tM1PlusRhoInv, M1tY=preCalcValues$M1tY, XtY=preCalcValues$XtY
     )
     estRes <- do.call(estFunctionName, c(commonArgs, penaltyParameterList))
 

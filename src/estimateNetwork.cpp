@@ -31,6 +31,7 @@ Rcpp::List estimateNetwork(
     double lambda2a,
     double lambda2b,
     Eigen::Map<Eigen::MatrixXd> XtX,
+    Eigen::Map<Eigen::MatrixXd> XtXPlusRhoInv,
     Eigen::Map<Eigen::MatrixXd> XtM1,
     Eigen::Map<Eigen::MatrixXd> M1tM1PlusRhoInv,
     Eigen::Map<Eigen::MatrixXd> M1tY,
@@ -38,7 +39,7 @@ Rcpp::List estimateNetwork(
     Eigen::Map<Eigen::MatrixXd> L
 ) {
   int p = M1.cols(), p2 = X.cols(), j;
-  Eigen::MatrixXd alphaStep1 = (XtX + Eigen::MatrixXd::Identity(p2, p2)).llt().solve(XtM1 + rho*alpha - tauAlpha);
+  Eigen::MatrixXd alphaStep1 = XtXPlusRhoInv * (XtM1 + rho*alpha - tauAlpha);
   Eigen::MatrixXd betaStep2 = M1tM1PlusRhoInv * (M1tY - XtM1.transpose() * gamma + rho*beta - tauBeta);
 
   double numerator, crossProd;
