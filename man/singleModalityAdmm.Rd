@@ -2,7 +2,7 @@
 % Please edit documentation in R/singleModalityAdmm.R
 \name{singleModalityAdmm}
 \alias{singleModalityAdmm}
-\title{High-dimensional Mediation Models with Pathway Lasso Penalty.}
+\title{High-dimensional Single Mediation Models}
 \usage{
 singleModalityAdmm(
   X,
@@ -65,6 +65,10 @@ Elastic Net (\code{ElasticNet}), Pathway Lasso (\code{PathywayLasso}), and  Netw
 
 \item{SISThreshold}{The threshold value for the target reduced dimension for mediators. The default is "2," which reduces the dimension to 2*n/log(n).}
 
+\item{maxIter}{The maximum iterations. Default is \code{3000}.}
+
+\item{tol}{The tolerence of convergence threshold. Default is \code{1e-4}.}
+
 \item{verbose}{A logical value to specify whether to print the iteration process.}
 
 \item{debug}{A logical value to specify whether to allow to print more details of the iteration process.}
@@ -78,7 +82,7 @@ A object, SingleModalityAdmm, with three elements.
 }
 }
 \description{
-High-dimensional Mediation Models with Pathway Lasso Penalty.
+High-dimensional Single Mediation Models
 }
 \examples{
 ## Generate Empirical Data
@@ -136,7 +140,6 @@ modelElasticNetSIS <- singleModalityAdmm(
 )
 fitted(modelElasticNetSIS)
 predict(modelElasticNetSIS, matrix(c(0, 1), ncol=1))
-
 }
 \references{
 \enumerate{

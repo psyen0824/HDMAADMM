@@ -2,6 +2,7 @@
 
 S3method(fitted,SingleModalityAdmm)
 S3method(predict,SingleModalityAdmm)
+export(cvSingleModalityAdmm)
 export(modalityMediationDataGen)
 export(singleModalityAdmm)
 importFrom(Rcpp,evalCpp)

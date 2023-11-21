@@ -12,7 +12,7 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-#' High-dimensional Mediation Models with Pathway Lasso Penalty.
+#' High-dimensional Single Mediation Models
 #'
 #' @param X The matrix of independent variables (exposure/treatment/group).
 #' @param Y The vector of dependent variable (outcome response).
@@ -48,6 +48,8 @@
 #' }
 #' @param SIS A logical value to specify whether to perform sure independence screening (SIS).
 #' @param SISThreshold The threshold value for the target reduced dimension for mediators. The default is "2," which reduces the dimension to 2*n/log(n).
+#' @param maxIter The maximum iterations. Default is \code{3000}.
+#' @param tol The tolerence of convergence threshold. Default is \code{1e-4}.
 #' @param verbose A logical value to specify whether to print the iteration process.
 #' @param debug A logical value to specify whether to allow to print more details of the iteration process.
 #' @references
@@ -110,7 +112,6 @@
 #' )
 #' fitted(modelElasticNetSIS)
 #' predict(modelElasticNetSIS, matrix(c(0, 1), ncol=1))
-#'
 #' @export
 singleModalityAdmm <- function(
     X, Y, M1,
@@ -119,6 +120,14 @@ singleModalityAdmm <- function(
     SIS = FALSE, SISThreshold = 2,
     maxIter=3000, tol=1e-4, verbose = FALSE, debug = FALSE
 ) {
+  if (!is.matrix(X)) {
+    X <- matrix(X, nrow = length(Y))
+  }
+
+  if (!is.matrix(Y)) {
+    Y <- matrix(Y, nrow = length(Y))
+  }
+
   sisIndex <- 1:ncol(M1)
   if (SIS) {
     pearsonCors <- abs(cor(Y, M1))
