@@ -30,7 +30,8 @@ Depends:
   R (>= 4.0.0)
 Imports: 
   Rcpp (>= 1.0.0),
-  dqrng
+  dqrng,
+  RcppEigen
 LinkingTo:
   Rcpp,
   RcppEigen
