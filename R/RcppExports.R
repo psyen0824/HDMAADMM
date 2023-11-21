@@ -29,3 +29,7 @@ fMatInv <- function(X, is_sym_pd = FALSE) {
     .Call('_HDMAADMM_fMatInv', PACKAGE = 'HDMAADMM', X, is_sym_pd)
 }
 
+fMatChol <- function(X) {
+    .Call('_HDMAADMM_fMatChol', PACKAGE = 'HDMAADMM', X)
+}
+

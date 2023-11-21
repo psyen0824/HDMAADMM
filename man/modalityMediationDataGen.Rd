@@ -7,11 +7,15 @@
 modalityMediationDataGen(
   n = 100,
   p = 50,
-  parameters = list(sigmaY = 1, sigmaM1 = diag(p), sizeNonZero = c(3, 3, 4), alphaMean =
-    c(6, 4, 2), alphaSd = c(0.1, 0.1, 0.1), betaMean = c(6, 4, 2), betaSd = c(0.1, 0.1,
-    0.1)),
-  trueValue = list(gamma = 3),
-  seed = 20231117
+  sigmaY = 1,
+  sizeNonZero = c(3, 3, 4),
+  alphaMean = c(6, 4, 2),
+  alphaSd = 0.1,
+  betaMean = c(6, 4, 2),
+  betaSd = 0.1,
+  sigmaM1 = NULL,
+  gamma = 3,
+  seed = 20231201
 )
 }
 \arguments{
@@ -19,25 +23,26 @@ modalityMediationDataGen(
 
 \item{p}{The number of high-dimensional mediators.}
 
-\item{parameters}{The true value of high-dimensional mediator model:
-The argument "SigmaY" represents the standard deviation (SD) of the error distribution for the dependent variable.
-The argument "SigmaM1" represents the covariance matrix of the error distribution among mediators.
-The argument "sizeNonZero" represents the number of nonzero mediators.
-Here, we provide simulated scenarios that could produce large, medium,
-and small mediated effects, generating from a normal distribution.
-The argument "alphaMean" and "alphaSD" represent the mean and SD vector of
-the effect between the mediator and independent variable.
-The argument "betaMean" and "betaSD" represent the mean and SD vector of
-the effect between the mediator and dependent variable.
-The argument "gamma" represents the true value of direct effect.}
+\item{sigmaY}{The argument "sigmaY" represents the standard deviation (SD) of the error distribution for the dependent variable.}
+
+\item{sizeNonZero}{The number of nonzero mediators. Here, we provide simulated scenarios that could produce large, medium,
+and small mediated effects, generating from a normal distribution.}
+
+\item{alphaMean, alphaSd}{The mean and SD vector of the effect between the mediator and independent variable.}
+
+\item{betaMean, betaSd}{The mean and SD vector of the effect between the mediator and dependent variable.}
+
+\item{sigmaM1}{The covariance matrix of the error distribution among mediators. Default is \code{diag(p)}.}
+
+\item{gamma}{The true value of direct effect.}
 
 \item{seed}{The random seed. Default is NULL to use the current seed.}
 }
 \value{
-A gen_data object with three elements.
+A object with three elements.
 \itemize{
-\item Medi_Data: The simulated data for high-dimensional mediation model.
-\item Medi_Para: The true value for mediated effect and direct effect.
+\item MediData: The simulated data for high-dimensional mediation model.
+\item MediPara: The true value for mediated effect and direct effect.
 \item Info : The output includes random seed and parameter setting for generating mediation model.
 }
 }

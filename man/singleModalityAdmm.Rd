@@ -123,6 +123,20 @@ modelNetwork <- singleModalityAdmm(
 # fitted & predict
 fitted(modelElasticNet)
 predict(modelElasticNet, matrix(c(0, 1), ncol=1))
+
+## With sure independence screening
+## Generate Empirical Data
+simuData <- modalityMediationDataGen(n = 50, p = 1000, seed = 20231201)
+
+## Parameter Estimation for ElasticNet penalty
+modelElasticNetSIS <- singleModalityAdmm(
+  X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
+  rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
+  penalty = "ElasticNet", SIS = TRUE
+)
+fitted(modelElasticNetSIS)
+predict(modelElasticNetSIS, matrix(c(0, 1), ncol=1))
+
 }
 \references{
 \enumerate{

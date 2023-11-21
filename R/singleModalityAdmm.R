@@ -97,6 +97,20 @@
 #' # fitted & predict
 #' fitted(modelElasticNet)
 #' predict(modelElasticNet, matrix(c(0, 1), ncol=1))
+#'
+#' ## With sure independence screening
+#' ## Generate Empirical Data
+#' simuData <- modalityMediationDataGen(n = 50, p = 1000, seed = 20231201)
+#'
+#' ## Parameter Estimation for ElasticNet penalty
+#' modelElasticNetSIS <- singleModalityAdmm(
+#'   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
+#'   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
+#'   penalty = "ElasticNet", SIS = TRUE
+#' )
+#' fitted(modelElasticNetSIS)
+#' predict(modelElasticNetSIS, matrix(c(0, 1), ncol=1))
+#'
 #' @export
 singleModalityAdmm <- function(
     X, Y, M1,
@@ -105,6 +119,12 @@ singleModalityAdmm <- function(
     SIS = FALSE, SISThreshold = 2,
     maxIter=3000, tol=1e-4, verbose = FALSE, debug = FALSE
 ) {
+  sisIndex <- 1:ncol(M1)
+  if (SIS) {
+    pearsonCors <- abs(cor(Y, M1))
+    sisIndex <- which(rank(-pearsonCors) <= SISThreshold*nrow(M1)/log(nrow(M1)))
+  }
+
   YY <- scale(Y)
   Y.center <- attr(YY,"scaled:center")
   Y.scale <- attr(YY,"scaled:scale")
@@ -112,12 +132,11 @@ singleModalityAdmm <- function(
   X.center <- attr(XX,"scaled:center")
   X.scale <- attr(XX,"scaled:scale")
 
-  MM1 <- scale(M1)
+  MM1 <- scale(M1[ , sisIndex])
   M1.center <- attr(MM1,"scaled:center")
   M1.scale <- attr(MM1,"scaled:scale")
 
-  n <- length(M1)
-  p <- ncol(M1)
+  p <- ncol(MM1)
 
   preCalcValues <- list(
     XtX = fMatTransProd(XX, XX),
@@ -216,19 +235,28 @@ singleModalityAdmm <- function(
     warning("Method does not converge!")
   }
 
+  pTrue <- ncol(M1)
+  alphaOut <- matrix(rep(0, pTrue), nrow=1)
+  alphaOut[ , sisIndex] <- estRes$alpha * M1.scale / X.scale
+  betaOut <- matrix(rep(0, pTrue), ncol=1)
+  betaOut[sisIndex, ] <- estRes$beta * Y.scale / M1.scale
+  gammaOut <- estRes$gamma * Y.scale/X.scale
+
   out <- list(
-    alpha = estRes$alpha * M1.scale / X.scale,
-    beta = estRes$beta * Y.scale/M1.scale,
-    gamma = estRes$gamma * Y.scale/X.scale,
+    alpha = alphaOut,
+    beta = betaOut,
+    gamma = gammaOut,
     isConv = iter < maxIter,
-    niter = iter
+    niter = iter,
+    interceptAlpha = colMeans(M1) - fMatProd(matrix(X.center, nrow=1), alphaOut),
+    interceptBeta = as.numeric(
+      Y.center - fMatProd(matrix(X.center, nrow=1), gammaOut) -
+        fMatProd(fMatProd(matrix(X.center, nrow=1), alphaOut), betaOut)
+    ),
+    loglik = 0.0,
+    fitted = matrix(rep(0, nrow(M1)), ncol=1)
   )
 
-  out$interceptAlpha <- mean(M1) - fMatProd(matrix(X.center, nrow=1), out$alpha)
-  out$interceptBeta <- as.numeric(
-    Y.center - fMatProd(matrix(X.center, nrow=1), out$gamma) -
-      fMatProd(fMatProd(matrix(X.center, nrow=1), out$alpha), out$beta)
-  )
   out$loglik <- getLogLikelihood(
     X, Y, M1, out$alpha, out$beta, matrix(out$gamma, 1, 1), out$interceptAlpha, out$interceptBeta
   )

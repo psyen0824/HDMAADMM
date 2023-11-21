@@ -153,6 +153,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// fMatChol
+Eigen::MatrixXd fMatChol(SEXP X);
+RcppExport SEXP _HDMAADMM_fMatChol(SEXP XSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type X(XSEXP);
+    rcpp_result_gen = Rcpp::wrap(fMatChol(X));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_HDMAADMM_estimateElasticNet", (DL_FUNC) &_HDMAADMM_estimateElasticNet, 19},
@@ -162,6 +173,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_HDMAADMM_fMatTransProd", (DL_FUNC) &_HDMAADMM_fMatTransProd, 3},
     {"_HDMAADMM_fMatSolve", (DL_FUNC) &_HDMAADMM_fMatSolve, 4},
     {"_HDMAADMM_fMatInv", (DL_FUNC) &_HDMAADMM_fMatInv, 2},
+    {"_HDMAADMM_fMatChol", (DL_FUNC) &_HDMAADMM_fMatChol, 1},
     {NULL, NULL, 0}
 };
 
