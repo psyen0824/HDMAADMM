@@ -51,7 +51,6 @@
 #' @param maxIter The maximum iterations. Default is \code{3000}.
 #' @param tol The tolerence of convergence threshold. Default is \code{1e-4}.
 #' @param verbose A logical value to specify whether to print the iteration process.
-#' @param debug A logical value to specify whether to allow to print more details of the iteration process.
 #' @references
 #' \enumerate{
 #'   \item Zhao, Y., & Luo, X. (2022). Pathway Lasso: pathway estimation and selection with high-dimensional mediators. Statistics and its interface, 15(1), 39.
@@ -119,7 +118,7 @@ singleModalityAdmm <- function(
     rho=1, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
     penalty = "ElasticNet", penaltyParameterList = list(),
     SIS = FALSE, SISThreshold = 2,
-    maxIter=3000, tol=1e-4, verbose = FALSE, debug = FALSE
+    maxIter=3000, tol=1e-4, verbose = FALSE
 ) {
   if (!is.matrix(X)) {
     X <- matrix(X, nrow = length(Y))
@@ -170,7 +169,7 @@ singleModalityAdmm <- function(
   fitResult <- singleModalityAdmmFit(
     XX, YY, MM1, alphaEst, betaEst, gammaEst,
     rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
-    penaltyType, penaltyParameterList, maxIter, tol, verbose, debug
+    penaltyType, penaltyParameterList, maxIter, tol, verbose
   )
 
   if (fitResult$niter >= maxIter) {

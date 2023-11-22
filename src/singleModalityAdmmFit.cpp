@@ -187,8 +187,7 @@ Rcpp::List singleModalityAdmmFit(
     Rcpp::List penaltyParameters,
     int maxIter,
     double tol,
-    bool verbose,
-    bool debug
+    bool verbose
 ) {
   int p = M1.cols();
   Eigen::MatrixXd XtX = X.transpose() * X;
@@ -246,7 +245,10 @@ Rcpp::List singleModalityAdmmFit(
       ((betaStep2New - betaStep2).array().pow(2).sum() < tol);
 
     if (verbose) {
-      Rcpp::Rcout << "" << std::endl;
+      if (verbose && (iter % 10 == 0)) {
+        Rcpp::Rcout << "Iteration " << iter << ": is converged: " << converged <<
+          ", alpha[0]: " << alphaNew(0, 0) << ", beta[0]: " << betaNew(0, 0) << std::endl;
+      }
     }
 
     alphaStep1 = alphaStep1New;
