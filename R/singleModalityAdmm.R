@@ -298,7 +298,7 @@ fitted.SingleModalityAdmm <- function(object, ...) {
 #' @method predict SingleModalityAdmm
 #' @importFrom stats predict
 #' @export
-predict.SingleModalityAdmm <- function(object, newdata) {
+predict.SingleModalityAdmm <- function(object, newdata, ...) {
   if (is.null(newdata))
     return(fitted(object))
   M1Hat <- sweep(fMatProd(newdata, object$alpha), 2, object$interceptAlpha, `+`)

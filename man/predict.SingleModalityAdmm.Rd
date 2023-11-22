@@ -4,7 +4,7 @@
 \alias{predict.SingleModalityAdmm}
 \title{Predict Method for SingleModalityAdmm Fits}
 \usage{
-\method{predict}{SingleModalityAdmm}(object, newdata)
+\method{predict}{SingleModalityAdmm}(object, newdata, ...)
 }
 \arguments{
 \item{object}{A fitted obejct of class inheriting from \code{SingleModalityAdmm}.}
