@@ -17,7 +17,7 @@
 #' @param X The matrix of independent variables (exposure/treatment/group).
 #' @param Y The vector of dependent variable (outcome response).
 #' @param M1 The single-modality mediator.
-#' @param nfolds The number of folds. The default is 10. Although nfolds can be as large as the sample size (leave-one-out CV),
+#' @param numFolds The number of folds. The default is 10. Although nfolds can be as large as the sample size (leave-one-out CV),
 #'  it is not recommended for large datasets. Smallest value allowable is nfolds=3.
 #' @param typeMeasure Default is "rmse".
 #' @param rho,lambda1g,lambda1a,lambda1b,lambda2a,lambda2b,penaltyParameterList Allow to put sequences for each parameter. Please refer to the function, \code{\link{singleModalityAdmm}} for the details.

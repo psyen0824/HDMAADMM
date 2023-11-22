@@ -33,14 +33,14 @@ cvSingleModalityAdmm(
 
 \item{M1}{The single-modality mediator.}
 
+\item{numFolds}{The number of folds. The default is 10. Although nfolds can be as large as the sample size (leave-one-out CV),
+it is not recommended for large datasets. Smallest value allowable is nfolds=3.}
+
 \item{typeMeasure}{Default is "rmse".}
 
 \item{rho, lambda1g, lambda1a, lambda1b, lambda2a, lambda2b, penaltyParameterList}{Allow to put sequences for each parameter. Please refer to the function, \code{\link{singleModalityAdmm}} for the details.}
 
 \item{penalty, SIS, SISThreshold, maxIter, tol, verbose, debug}{Please refer to the function, \code{\link{singleModalityAdmm}}.}
-
-\item{nfolds}{The number of folds. The default is 10. Although nfolds can be as large as the sample size (leave-one-out CV),
-it is not recommended for large datasets. Smallest value allowable is nfolds=3.}
 }
 \description{
 Cross Validation for High-dimensional Single Mediation Models
