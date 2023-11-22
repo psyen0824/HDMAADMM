@@ -148,20 +148,9 @@ singleModalityAdmm <- function(
 
   p <- ncol(MM1)
 
-  preCalcValues <- list(
-    XtX = fMatTransProd(XX, XX),
-    XtM1 = fMatTransProd(XX, MM1),
-    M1tM1PlusRhoInv = fMatInv(fMatTransProd(MM1, MM1) + rho*diag(p), TRUE),
-    M1tY = fMatTransProd(MM1, YY),
-    XtY = fMatTransProd(XX, YY)
-  )
-  preCalcValues$XtXPlusRhoInv <- fMatInv(preCalcValues$XtX + rho*diag(ncol(XX)), TRUE)
-
   gammaEst <- matrix(coef(lm(YY~XX+MM1))[2:(2+ncol(X)-1)], ncol=1)
   alphaEst <- coef(lm(MM1~XX))[2, , drop=FALSE]
   betaEst <- matrix(sapply(1:p, function(i) coef(lm(YY~XX+MM1[,i]))[3]), ncol=1)
-  tauAlphaEst <- matrix(rep(0, p), nrow=1)
-  tauBetaEst <- matrix(rep(0, p), ncol=1)
 
   if (penalty == "Network") {
     if (!("L" %in% names(penaltyParameterList))) {
@@ -177,89 +166,30 @@ singleModalityAdmm <- function(
     stop("No such penalty.")
   }
 
-  iter <- 0L
-  estFunctionName <- sprintf("estimate%s", penalty)
-  commonArgs <- list(
-    X=XX, Y=YY, M1=MM1, alpha=alphaEst, beta=betaEst, gamma=gammaEst, tauAlpha=tauAlphaEst, tauBeta=tauBetaEst,
-    rho = rho, lambda1a=lambda1a, lambda1b=lambda1b, lambda1g=lambda1g, lambda2a=lambda2a, lambda2b=lambda2b,
-    XtX=preCalcValues$XtX, XtXPlusRhoInv = preCalcValues$XtXPlusRhoInv, XtM1=preCalcValues$XtM1,
-    M1tM1PlusRhoInv=preCalcValues$M1tM1PlusRhoInv, M1tY=preCalcValues$M1tY, XtY=preCalcValues$XtY
-  )
-  estRes <- do.call(estFunctionName, c(commonArgs, penaltyParameterList))
-
-  if (verbose || debug) {
-    cat(sprintf(
-      "Initial values - gamma: %.6f, alpha[1]: %.6f, beta[1]: %.6f, tauAlpha[1]: %.6f, tauBeta[1]: %.6f\n",
-      gammaEst, alphaEst[1], betaEst[1], tauAlphaEst[1], tauBetaEst[1]
-    ))
-    cat(sprintf(
-      "Iteration %i - gamma: %.6f, alpha[1]: %.6f, beta[1]: %.6f, tauAlpha[1]: %.6f, tauBeta[1]: %.6f\n",
-      iter, estRes$gamma, estRes$alpha[1], estRes$beta[1], estRes$tauAlpha[1], estRes$tauBeta[1]
-    ))
-  }
-
-  cont <- TRUE
-  estResOld <- list(
-    alphaStep1 = alphaEst+9999, betaStep2 = betaEst+9999,
-    alpha = alphaEst+9999, beta = betaEst+9999, gamma = gammaEst+9999,
-    tauAlpha = tauAlphaEst+9999, tauBeta = tauBetaEst+9999
+  penaltyType <- switch(penalty, ElasticNet = 1L, Network = 2L, PathwayLasso = 3L)
+  fitResult <- singleModalityAdmmFit(
+    XX, YY, MM1, alphaEst, betaEst, gammaEst,
+    rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
+    penaltyType, penaltyParameterList, maxIter, tol, verbose, debug
   )
 
-  while (cont) {
-    iter <- iter + 1L
-
-    estResOld <- estRes
-    commonArgs <- list(
-      X=XX, Y=YY, M1=MM1, alpha=estRes$alpha, beta=estRes$beta, gamma=estRes$gamma, tauAlpha=estRes$tauAlpha, tauBeta=estRes$tauBeta,
-      rho = rho, lambda1a=lambda1a, lambda1b=lambda1b, lambda1g=lambda1g, lambda2a=lambda2a, lambda2b=lambda2b,
-      XtX=preCalcValues$XtX, XtXPlusRhoInv = preCalcValues$XtXPlusRhoInv, XtM1=preCalcValues$XtM1,
-      M1tM1PlusRhoInv=preCalcValues$M1tM1PlusRhoInv, M1tY=preCalcValues$M1tY, XtY=preCalcValues$XtY
-    )
-    estRes <- do.call(estFunctionName, c(commonArgs, penaltyParameterList))
-
-    convCondNums <- c(
-      sum((estRes$gamma - estResOld$gamma)^2),
-      sum((estRes$alphaStep1 - estRes$alpha)^2),
-      sum((estRes$alphaStep1 - estResOld$alphaStep1)^2),
-      sum((estRes$betaStep2 - estRes$beta)^2),
-      sum((estRes$betaStep2 - estResOld$betaStep2)^2)
-    )
-    cont <- (iter < maxIter) && any(convCondNums >= tol)
-
-    if (verbose || debug) {
-      if ((verbose && (iter %% 10 == 0)) || debug) {
-        cat(sprintf(
-          "Iteration %i - isConv: %i, gamma: %.6f, alpha[1]: %.6f, beta[1]: %.6f, alphaStep1[1]: %.6f, betaStep2[1]: %.6f, tauAlpha[1]: %.6f, tauBeta[1]: %.6f\n",
-          iter, !cont, estRes$gamma, estRes$alpha[1], estRes$beta[1], estRes$alphaStep1[1], estRes$betaStep2[1], estRes$tauAlpha[1], estRes$tauBeta[1]
-        ))
-
-        if (debug) {
-          cat(sprintf(
-            "         - converging condition SSE: %.6f, %.6f, %.6f, %.6f, %.6f\n",
-            convCondNums[1], convCondNums[2], convCondNums[3], convCondNums[4], convCondNums[5]
-          ))
-        }
-      }
-    }
-  }
-
-  if (iter >= maxIter) {
+  if (fitResult$niter >= maxIter) {
     warning("Method does not converge!")
   }
 
   pTrue <- ncol(M1)
   alphaOut <- matrix(rep(0, pTrue), nrow=1)
-  alphaOut[ , sisIndex] <- estRes$alpha * M1.scale / X.scale
+  alphaOut[ , sisIndex] <- fitResult$alpha * M1.scale / X.scale
   betaOut <- matrix(rep(0, pTrue), ncol=1)
-  betaOut[sisIndex, ] <- estRes$beta * Y.scale / M1.scale
-  gammaOut <- estRes$gamma * Y.scale/X.scale
+  betaOut[sisIndex, ] <- fitResult$beta * Y.scale / M1.scale
+  gammaOut <- fitResult$gamma * Y.scale/X.scale
 
   out <- list(
     alpha = alphaOut,
     beta = betaOut,
     gamma = gammaOut,
-    isConv = iter < maxIter,
-    niter = iter,
+    isConv = fitResult$niter < maxIter,
+    niter = fitResult$niter,
     interceptAlpha = colMeans(M1) - fMatProd(matrix(X.center, nrow=1), alphaOut),
     interceptBeta = as.numeric(
       Y.center - fMatProd(matrix(X.center, nrow=1), gammaOut) -
