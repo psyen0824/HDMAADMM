@@ -16,3 +16,11 @@ Elastic Net (doi.org/10.1111/j.1467-9868.2005.00503.x), Pathway Lasso (10.4310/2
 Network Penalty (doi.org/10.1093/bioinformatics/btn081), ADMM (doi.org/10.1561/2200000016),
 and SIS (doi.org/10.1111/j.1467-9868.2008.00674.x).
 }
+\references{
+\enumerate{
+\item Tibshirani, R. (1996). Regression Shrinkage and Selection via the Lasso. Journal of the Royal Statistical Society. Series B (Methodological), 58(1), 267–288.
+\item Zou, H., & Hastie, T. (2005). Regularization and Variable Selection via the Elastic Net. Journal of the Royal Statistical Society. Series B (Statistical Methodology), 67(2), 301–320.
+\item Zhao, Y., & Luo, X. (2022). Pathway Lasso: pathway estimation and selection with high-dimensional mediators. Statistics and its interface, 15(1), 39.
+\item Li, C., Li, H. (2008). Network-constrained regularization and variable selection for analysis of genomic data, Bioinformatics, 24(9), 1175–1182,
+}
+}

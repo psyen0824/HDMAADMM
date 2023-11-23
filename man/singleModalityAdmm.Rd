@@ -20,8 +20,7 @@ singleModalityAdmm(
   SISThreshold = 2,
   maxIter = 3000,
   tol = 1e-04,
-  verbose = FALSE,
-  debug = FALSE
+  verbose = FALSE
 )
 }
 \arguments{
@@ -70,8 +69,6 @@ Elastic Net (\code{ElasticNet}), Pathway Lasso (\code{PathywayLasso}), and  Netw
 \item{tol}{The tolerence of convergence threshold. Default is \code{1e-4}.}
 
 \item{verbose}{A logical value to specify whether to print the iteration process.}
-
-\item{debug}{A logical value to specify whether to allow to print more details of the iteration process.}
 }
 \value{
 A object, SingleModalityAdmm, with three elements.
@@ -140,9 +137,4 @@ modelElasticNetSIS <- singleModalityAdmm(
 )
 fitted(modelElasticNetSIS)
 predict(modelElasticNetSIS, matrix(c(0, 1), ncol=1))
-}
-\references{
-\enumerate{
-\item Zhao, Y., & Luo, X. (2022). Pathway Lasso: pathway estimation and selection with high-dimensional mediators. Statistics and its interface, 15(1), 39.
-}
 }

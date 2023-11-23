@@ -51,10 +51,6 @@
 #' @param maxIter The maximum iterations. Default is \code{3000}.
 #' @param tol The tolerence of convergence threshold. Default is \code{1e-4}.
 #' @param verbose A logical value to specify whether to print the iteration process.
-#' @references
-#' \enumerate{
-#'   \item Zhao, Y., & Luo, X. (2022). Pathway Lasso: pathway estimation and selection with high-dimensional mediators. Statistics and its interface, 15(1), 39.
-#' }
 #' @examples
 #' ## Generate Empirical Data
 #' simuData <- modalityMediationDataGen(seed = 20231201)
