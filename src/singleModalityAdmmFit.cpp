@@ -53,9 +53,9 @@ Eigen::MatrixXd upadteAlphaNetwork(
   double numerator, crossProd;
   Eigen::MatrixXd alphaNew = alpha;
   for (j = 0; j < p; j++) {
-    crossProd = alphaNew.row(0).dot(L.col(j)) - alphaNew(0, j) * L(j, j);
+    crossProd = alphaNew(0, j) * L(j, j) - alphaNew.row(0).dot(L.col(j));
     numerator = softThreshold(lambda2a * crossProd + tauAlpha(0, j) + rho * alphaStep1(0, j), lambda1a);
-    alphaNew(0, j) = numerator / (lambda2a * (1 - L(j, j)) + rho);
+    alphaNew(0, j) = numerator / (lambda2a * L(j, j) + rho);
   }
   return alphaNew;
 };
@@ -73,9 +73,9 @@ Eigen::MatrixXd upadteBetaNetwork(
   double numerator, crossProd;
   Eigen::MatrixXd betaNew = beta;
   for (j = 0; j < p; j++) {
-    crossProd = betaNew.col(0).dot(L.col(j)) - betaNew(j, 0) * L(j, j);
+    crossProd = betaNew(j, 0) * L(j, j) - betaNew.col(0).dot(L.col(j));
     numerator = softThreshold(lambda2b * crossProd + tauBeta(j, 0) + rho * betaStep2(j, 0), lambda1b);
-    betaNew(j, 0) =  numerator / (lambda2b * (1 - L(j, j)) + rho);
+    betaNew(j, 0) =  numerator / (lambda2b * L(j, j) + rho);
   }
   return betaNew;
 };
