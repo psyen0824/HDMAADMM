@@ -1,6 +1,6 @@
 Package: HDMAADMM
 Type: Package
-Title: Parameter Estimation of High-dimensional Mediation Models Based on Alternating Direction Method of Multipliers (ADMM)
+Title: ADMM for High-Dimensional Mediation Models
 Version: 0.0.1
 Date: 2023-12-01
 Authors@R: c(person(given = "Pei-Shan",
@@ -14,8 +14,7 @@ Authors@R: c(person(given = "Pei-Shan",
            email = "zw12356@gmail.com",
            comment = c(ORCID = '0009-0007-8273-3206')))
 Maintainer: Pei-Shan Yen <peishan0824@gmail.com>
-Description: This package enables the estimation of single-modality high-dimensional mediation models. We employ penalized maximum likelihood and solve the estimation using the Alternating Direction Method of Multipliers (ADMM) to provide high-dimensional mediator estimates. To improve the sensitivity and specificity of non-zero mediators, we offer the sure independence screening (SIS) function for dimension reduction. The available penalty options include Lasso, Elastic Net, Pathway Lasso, and Network-constrained Penalty. The methods employed in the package are based on Lasso (doi.org/10.1111/j.2517-6161.1996.tb02080.x), Elastic Net (doi.org/10.1111/j.1467-9868.2005.00503.x), Pathway Lasso (10.4310/21-sii673), Network Penalty (doi.org/10.1093/bioinformatics/btn081), ADMM (doi.org/10.1561/2200000016), 
- and SIS (doi.org/10.1111/j.1467-9868.2008.00674.x).
+Description: We use the Alternating Direction Method of Multipliers (ADMM) for parameter estimation in high-dimensional, single-modality mediation models. To improve the sensitivity and specificity of non-zero mediators, we offer the sure independence screening (SIS) function for dimension reduction. The available penalty options include Lasso, Elastic Net, Pathway Lasso, and Network-constrained Penalty. The methods employed in the package are based on Boyd, S., Parikh, N., Chu, E., Peleato, B., & Eckstein, J. (2011). <doi:10.1561/2200000016>, Fan, J., & Lv, J. (2008) <doi:10.1111/j.1467-9868.2008.00674.x>, Li, C., & Li, H. (2008) <doi:10.1093/bioinformatics/btn081>, Tibshirani, R. (1996) <doi:10.1111/j.2517-6161.1996.tb02080.x>, Zou, H., & Hastie, T. (2005) <doi:10.1111/j.1467-9868.2005.00503.x>, and Zhao, Y., & Luo, X. (2022) <doi:10.4310/21-sii673>.
 License: MIT + file LICENSE
 Depends:
   R (>= 4.0.0)
