@@ -2,7 +2,7 @@
 % Please edit documentation in R/singleModalityAdmm.R
 \name{singleModalityAdmm}
 \alias{singleModalityAdmm}
-\title{High-dimensional Single Mediation Models}
+\title{High-dimensional Single Modality Mediation Models}
 \usage{
 singleModalityAdmm(
   X,
@@ -79,7 +79,7 @@ A object, SingleModalityAdmm, with three elements.
 }
 }
 \description{
-High-dimensional Single Mediation Models
+High-dimensional Single Modality Mediation Models
 }
 \examples{
 ## Generate Empirical Data
