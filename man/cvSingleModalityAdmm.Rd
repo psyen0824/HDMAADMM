@@ -42,6 +42,9 @@ it is not recommended for large datasets. Smallest value allowable is nfolds=3.}
 
 \item{penalty, SIS, SISThreshold, maxIter, tol, verbose, debug}{Please refer to the function, \code{\link{singleModalityAdmm}}.}
 }
+\value{
+An \code{cvSingleModalityAdmm} object which is a matrix containing all the combinations of parameter sequences with an additional column called \code{measure}.
+}
 \description{
 Cross Validation for High-dimensional Single Mediation Models
 }

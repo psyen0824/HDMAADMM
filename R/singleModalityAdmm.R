@@ -36,7 +36,7 @@
 #'   }
 #'   \item Penalty=\code{Network} needs one parameter.
 #'   \itemize{
-#'     \item L The network.
+#'     \item laplacianMatrix The Laplacian matrix applied on network penalty.
 #'   }
 #'   \item Penalty=\code{ElasticNet} don't need other parameters.
 #' }
@@ -53,7 +53,7 @@
 #' @param verbose A logical value to specify whether to print the iteration process.
 #' @examples
 #' ## Generate Empirical Data
-#' simuData <- modalityMediationDataGen(seed = 20231201)
+#' simuData <- modalityMediationDataGen(seed = 20231201, generateLaplacianMatrix = TRUE)
 #'
 #' ## Parameter Estimation for ElasticNet penalty
 #' modelElasticNet <- singleModalityAdmm(
@@ -61,6 +61,10 @@
 #'   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
 #'   penalty = "ElasticNet"
 #' )
+#'
+#' # fitted & predict
+#' fitted(modelElasticNet)
+#' predict(modelElasticNet, matrix(c(0, 1), ncol=1))
 #'
 #' ## Parameter Estimation for Pathway Lasso penalty
 #' modelPathwayLasso <- singleModalityAdmm(
@@ -70,6 +74,13 @@
 #' )
 #'
 #' ## Parameter Estimation for Network penalty
+#' modelNetwork <- singleModalityAdmm(
+#'   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
+#'   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
+#'   penalty = "Network", penaltyParameterList = list(laplacianMatrix = simuData$Info$laplacianMatrix)
+#' )
+#'
+#' ## Parameter Estimation for Network penalty with a customized Laplacian matrix
 #' p <- 50
 #' A <- matrix(rep(0, p*p), p, p)
 #' A[1:10, 1:10] <- 1
@@ -81,19 +92,12 @@
 #' A[31:50, 31:50] <- 1
 #' A[31:50, 11:20] <- 1
 #' diag(A) <- 0
-#' d <- colSums(A)
-#' diagL <- 1 - rowSums(A) / d
-#' L <- -A / sqrt(d %o% d)
-#' diag(L) <- diagL
+#' L <- adjacencyToLaplacian(A)
 #' modelNetwork <- singleModalityAdmm(
 #'   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
 #'   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
-#'   penalty = "Network", penaltyParameterList = list(L = L)
+#'   penalty = "Network", penaltyParameterList = list(laplacianMatrix = L)
 #' )
-#'
-#' # fitted & predict
-#' fitted(modelElasticNet)
-#' predict(modelElasticNet, matrix(c(0, 1), ncol=1))
 #'
 #' ## With sure independence screening
 #' ## Generate Empirical Data
@@ -111,10 +115,10 @@
 #' @export
 singleModalityAdmm <- function(
     X, Y, M1,
-    rho=1, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
+    rho = 1, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
     penalty = "ElasticNet", penaltyParameterList = list(),
     SIS = FALSE, SISThreshold = 2,
-    maxIter=3000, tol=1e-4, verbose = FALSE
+    maxIter = 3000, tol = 1e-4, verbose = FALSE
 ) {
   if (!is.matrix(X)) {
     X <- matrix(X, nrow = length(Y))
@@ -148,8 +152,8 @@ singleModalityAdmm <- function(
   betaEst <- matrix(sapply(1:p, function(i) coef(lm(YY~XX+MM1[,i]))[3]), ncol=1)
 
   if (penalty == "Network") {
-    if (!("L" %in% names(penaltyParameterList))) {
-      stop("penaltyParameterList should contains L for Network penalty")
+    if (!("laplacianMatrix" %in% names(penaltyParameterList))) {
+      stop("penaltyParameterList should contains laplacianMatrix for Network penalty")
     }
   } else if (penalty == "PathwayLasso") {
     if (!("kappa" %in% names(penaltyParameterList)) || !("nu" %in% names(penaltyParameterList))) {
@@ -209,6 +213,7 @@ singleModalityAdmm <- function(
 #' @param object A fitted obejct of class inheriting from \code{SingleModalityAdmm}.
 #' @param ... further arguments passed to or from other methods.
 #' @method fitted SingleModalityAdmm
+#' @return fitted.SingleModalityAdmm returns a vector which is fitted values.
 #' @importFrom stats fitted
 #' @export
 fitted.SingleModalityAdmm <- function(object, ...) {
@@ -221,6 +226,7 @@ fitted.SingleModalityAdmm <- function(object, ...) {
 #' @param newdata Default is \code{NULL}. A matrix with variables to predict.
 #' @param ... further arguments passed to or from other methods.
 #' @method predict SingleModalityAdmm
+#' @return predict.SingleModalityAdmm returns a vector which is the predicted values based on \code{newdata}.
 #' @importFrom stats predict
 #' @export
 predict.SingleModalityAdmm <- function(object, newdata, ...) {

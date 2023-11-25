@@ -52,6 +52,7 @@ modalityMediationDataGen <- function(
     betaSd = 0.1,
     sigmaM1 = NULL,
     gamma = 3,
+    generateLaplacianMatrix = FALSE,
     seed = 20231201
 ) {
   if (is.null(sigmaM1)) {
@@ -127,8 +128,7 @@ modalityMediationDataGen <- function(
   # Y = Continuous Outcome Response
   Y <- fMatProd(X, gamma) + fMatProd(M1, beta) + dqrnorm(n = n, mean = 0, sd = sigmaY)
 
-  return(
-    list(
+  out <- list(
       MediData = list(X = X, M1= M1,  Y=Y),
       MediPara = list(alpha = alpha, beta = beta, gamma = gamma),
       Info = list(
@@ -142,8 +142,23 @@ modalityMediationDataGen <- function(
           sigmaM1 = sigmaM1
         ),
         trueValue = list(gamma = gamma),
+        laplacianMatrix = NULL,
         seed = seed
       )
     )
-  )
+
+  if (generateLaplacianMatrix) {
+    A <- matrix(0, p, p)
+    for (i in 1:p) {
+      A[i, i] <- summary(lm(Y ~ M1[ ,i]))$r.squared
+    }
+    for (i in 1:(p-1)) {
+      for (j in (i+1):p) {
+        A[i, j] <- summary(lm(Y ~ M1[ ,i] + M1[ ,j]))$r.squared
+      }
+    }
+    A[lower.tri(A)] <- t(A)[lower.tri(A)]
+    out$Info$laplacianMatrix <- adjacencyToLaplacian(A)
+  }
+  return(out)
 }

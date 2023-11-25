@@ -15,6 +15,7 @@ modalityMediationDataGen(
   betaSd = 0.1,
   sigmaM1 = NULL,
   gamma = 3,
+  generateLaplacianMatrix = FALSE,
   seed = 20231201
 )
 }

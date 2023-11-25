@@ -41,7 +41,7 @@ Eigen::MatrixXd upadteBetaElasticNet(
 };
 
 Eigen::MatrixXd upadteAlphaNetwork(
-    Eigen::MatrixXd L,
+    Eigen::MatrixXd laplacianMatrix,
     Eigen::MatrixXd alpha,
     Eigen::MatrixXd alphaStep1,
     Eigen::MatrixXd tauAlpha,
@@ -53,15 +53,15 @@ Eigen::MatrixXd upadteAlphaNetwork(
   double numerator, crossProd;
   Eigen::MatrixXd alphaNew = alpha;
   for (j = 0; j < p; j++) {
-    crossProd = alphaNew(0, j) * L(j, j) - alphaNew.row(0).dot(L.col(j));
+    crossProd = alphaNew(0, j) * laplacianMatrix(j, j) - alphaNew.row(0).dot(laplacianMatrix.col(j));
     numerator = softThreshold(lambda2a * crossProd + tauAlpha(0, j) + rho * alphaStep1(0, j), lambda1a);
-    alphaNew(0, j) = numerator / (lambda2a * L(j, j) + rho);
+    alphaNew(0, j) = numerator / (lambda2a * laplacianMatrix(j, j) + rho);
   }
   return alphaNew;
 };
 
 Eigen::MatrixXd upadteBetaNetwork(
-    Eigen::MatrixXd L,
+    Eigen::MatrixXd laplacianMatrix,
     Eigen::MatrixXd beta,
     Eigen::MatrixXd betaStep2,
     Eigen::MatrixXd tauBeta,
@@ -73,9 +73,9 @@ Eigen::MatrixXd upadteBetaNetwork(
   double numerator, crossProd;
   Eigen::MatrixXd betaNew = beta;
   for (j = 0; j < p; j++) {
-    crossProd = betaNew(j, 0) * L(j, j) - betaNew.col(0).dot(L.col(j));
+    crossProd = betaNew(j, 0) * laplacianMatrix(j, j) - betaNew.col(0).dot(laplacianMatrix.col(j));
     numerator = softThreshold(lambda2b * crossProd + tauBeta(j, 0) + rho * betaStep2(j, 0), lambda1b);
-    betaNew(j, 0) =  numerator / (lambda2b * L(j, j) + rho);
+    betaNew(j, 0) =  numerator / (lambda2b * laplacianMatrix(j, j) + rho);
   }
   return betaNew;
 };
@@ -199,9 +199,9 @@ Rcpp::List singleModalityAdmmFit(
   Eigen::MatrixXd M1tM1PlusRho = M1.transpose() * M1;
   M1tM1PlusRho.diagonal().array() += rho;
 
-  Eigen::MatrixXd L = Eigen::MatrixXd::Identity(1, 1);
+  Eigen::MatrixXd laplacianMatrix = Eigen::MatrixXd::Identity(1, 1);
   if (penaltyType == 2) {
-    L = Rcpp::as<Eigen::MatrixXd>(penaltyParameters("L"));
+    laplacianMatrix = Rcpp::as<Eigen::MatrixXd>(penaltyParameters("laplacianMatrix"));
   }
 
   double kappa = 0.0, nu = 0.0;
@@ -225,8 +225,8 @@ Rcpp::List singleModalityAdmmFit(
       alphaNew = upadteAlphaElasticNet(alphaStep1New, tauAlpha, rho, lambda1a, lambda2a);
       betaNew = upadteBetaElasticNet(betaStep2New, tauBeta, rho, lambda1b, lambda2b);
     } else if (penaltyType == 2) {
-      alphaNew = upadteAlphaNetwork(L, alpha, alphaStep1New, tauAlpha, rho, lambda1a, lambda2a);
-      betaNew = upadteBetaNetwork(L, beta, betaStep2New, tauBeta, rho, lambda1b, lambda2b);
+      alphaNew = upadteAlphaNetwork(laplacianMatrix, alpha, alphaStep1New, tauAlpha, rho, lambda1a, lambda2a);
+      betaNew = upadteBetaNetwork(laplacianMatrix, beta, betaStep2New, tauBeta, rho, lambda1b, lambda2b);
     } else if (penaltyType == 3) {
       std::tie(alphaNew, betaNew) = upadteAlphaBetaPasswayLasso(
         alphaStep1New, betaStep2New, tauAlpha, tauBeta,

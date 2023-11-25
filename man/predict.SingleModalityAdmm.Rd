@@ -13,6 +13,9 @@
 
 \item{...}{further arguments passed to or from other methods.}
 }
+\value{
+predict.SingleModalityAdmm returns a vector which is the predicted values based on \code{newdata}.
+}
 \description{
 Predict Method for SingleModalityAdmm Fits
 }

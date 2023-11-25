@@ -11,6 +11,9 @@
 
 \item{...}{further arguments passed to or from other methods.}
 }
+\value{
+fitted.SingleModalityAdmm returns a vector which is fitted values.
+}
 \description{
 Fitted Response of SingleModalityAdmm Fits
 }
