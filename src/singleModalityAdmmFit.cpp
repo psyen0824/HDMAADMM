@@ -156,17 +156,17 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> upadteAlphaBetaPasswayLasso(
 
 Eigen::MatrixXd updateGammaFunc(
     Eigen::MatrixXd betaStep2,
-    Eigen::MatrixXd XtX,
+    Eigen::MatrixXd XtXInv,
     Eigen::MatrixXd XtM1,
     Eigen::MatrixXd XtY,
     double lambda1g
 ) {
-  int p = XtX.cols(), j;
+  int p = XtXInv.cols(), j;
   Eigen::MatrixXd gammaTemp = XtY - XtM1 * betaStep2;
   for (j = 0; j < p; j++) {
     gammaTemp(j, 0) = softThreshold(gammaTemp(j, 0), lambda1g);
   }
-  return XtX.llt().solve(gammaTemp);
+  return XtXInv * gammaTemp;
 }
 
 // [[Rcpp::export]]
@@ -191,13 +191,16 @@ Rcpp::List singleModalityAdmmFit(
 ) {
   int p = M1.cols();
   Eigen::MatrixXd XtX = X.transpose() * X;
+  Eigen::MatrixXd XtXInv = XtX.inverse();
   Eigen::MatrixXd XtM1 = X.transpose() * M1;
   Eigen::MatrixXd M1tY = M1.transpose() * Y;
   Eigen::MatrixXd XtY = X.transpose() * Y;
   Eigen::MatrixXd XtXPlusRho = XtX;
   XtX.diagonal().array() += rho;
+  Eigen::MatrixXd XtXPlusRhoInv = XtXPlusRho.inverse();
   Eigen::MatrixXd M1tM1PlusRho = M1.transpose() * M1;
   M1tM1PlusRho.diagonal().array() += rho;
+  Eigen::MatrixXd M1tM1PlusRhoInv = M1tM1PlusRho.inverse();
 
   Eigen::MatrixXd laplacianMatrix = Eigen::MatrixXd::Identity(1, 1);
   if (penaltyType == 2) {
@@ -218,8 +221,8 @@ Rcpp::List singleModalityAdmmFit(
   Eigen::MatrixXd alphaStep1New, betaStep2New, alphaNew, betaNew, gammaNew, tauAlphaNew, tauBetaNew;
   while ((iter <= maxIter) && !converged) {
     iter += 1;
-    alphaStep1New = XtXPlusRho.llt().solve(XtM1 + rho*alpha - tauAlpha);
-    betaStep2New = M1tM1PlusRho.llt().solve(M1tY - XtM1.transpose() * gamma + rho*beta - tauBeta);
+    alphaStep1New = XtXPlusRhoInv * (XtM1 + rho*alpha - tauAlpha);
+    betaStep2New = M1tM1PlusRhoInv * (M1tY - XtM1.transpose() * gamma + rho*beta - tauBeta);
 
     if (penaltyType == 1) {
       alphaNew = upadteAlphaElasticNet(alphaStep1New, tauAlpha, rho, lambda1a, lambda2a);
@@ -234,7 +237,7 @@ Rcpp::List singleModalityAdmmFit(
       );
     }
 
-    gammaNew = updateGammaFunc(betaStep2New, XtX, XtM1, XtY, lambda1g);
+    gammaNew = updateGammaFunc(betaStep2New, XtXInv, XtM1, XtY, lambda1g);
     tauAlphaNew = tauAlpha + rho * (alphaStep1New - alphaNew);
     tauBetaNew = tauBeta + rho * (betaStep2New - betaNew);
 

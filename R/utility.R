@@ -35,8 +35,7 @@ getLogLikelihood <- function(X, Y, M1, alpha, beta, gamma, interceptAlpha, inter
   for (i in seq_len(ncol(A))) {
     l1 <- l1 + (-1/2) * crossprod(A[ , i])
   }
-  B <-Y - interceptBeta[1] - fMatProd(X, gamma) - fMatProd(M1, beta)
+  B <- Y - interceptBeta[1] - fMatProd(X, gamma) - fMatProd(M1, beta)
   l2 <- (-1/2)*fMatTransProd(B, B)
-
   return(list(l=as.numeric(l1+l2), l1=as.numeric(l1), l2=as.numeric(l2)))
 }
