@@ -49,7 +49,7 @@
 #' @param SIS A logical value to specify whether to perform sure independence screening (SIS).
 #' @param SISThreshold The threshold value for the target reduced dimension for mediators. The default is "2," which reduces the dimension to 2*n/log(n).
 #' @param maxIter The maximum iterations. Default is \code{3000}.
-#' @param tol The tolerence of convergence threshold. Default is \code{1e-4}.
+#' @param tol The tolerence of convergence threshold. Default is \code{1e-3}.
 #' @param verbose A logical value to specify whether to print the iteration process.
 #' @examples
 #' ## Generate Empirical Data
@@ -118,7 +118,7 @@ singleModalityAdmm <- function(
     rho = 1, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
     penalty = "ElasticNet", penaltyParameterList = list(),
     SIS = FALSE, SISThreshold = 2,
-    maxIter = 3000, tol = 1e-4, verbose = FALSE
+    maxIter = 3000, tol = 1e-3, verbose = FALSE
 ) {
   if (!is.matrix(X)) {
     X <- matrix(X, nrow = length(Y))

@@ -19,7 +19,7 @@ singleModalityAdmm(
   SIS = FALSE,
   SISThreshold = 2,
   maxIter = 3000,
-  tol = 1e-04,
+  tol = 0.001,
   verbose = FALSE
 )
 }
@@ -66,7 +66,7 @@ Elastic Net (\code{ElasticNet}), Pathway Lasso (\code{PathywayLasso}), and  Netw
 
 \item{maxIter}{The maximum iterations. Default is \code{3000}.}
 
-\item{tol}{The tolerence of convergence threshold. Default is \code{1e-4}.}
+\item{tol}{The tolerence of convergence threshold. Default is \code{1e-3}.}
 
 \item{verbose}{A logical value to specify whether to print the iteration process.}
 }
