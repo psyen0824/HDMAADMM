@@ -27,22 +27,22 @@
 #' ## Generate Empirical Data
 #' simuData <- modalityMediationDataGen(seed = 20231201)
 #'
-#' ## Parameter Estimation for ElasticNet penalty
-#' modelElasticNet <- cvSingleModalityAdmm(
+#' ## Cross-Validation for ElasticNet penalty
+#' cvElasticNetResults <- cvSingleModalityAdmm(
 #'   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
 #'   numFolds = 5, typeMeasure = "rmse",
-#'   rho = 1, lambda1a = c(0.1, 0.5, 1), lambda1b = c(0.1, 0.3),
-#'   lambda1g = 2, lambda2a = c(0.5, 1), lambda2b = c(0.5, 1),
+#'   rho = c(0.9, 1, 1.1), lambda1a = c(0.1, 0.5, 1), lambda1b = c(0.1, 0.3),
+#'   lambda1g = c(1, 2), lambda2a = c(0.5, 1), lambda2b = c(0.5, 1),
 #'   penalty = "ElasticNet"
 #' )
 #'
-#' ## Parameter Estimation for Pathway Lasso penalty
-#' modelPathwayLasso <- cvSingleModalityAdmm(
+#' ## Cross-Validation for Pathway Lasso penalty (lambda2a, lambda2b are not tuned.)
+#' cvPathwayLassoResults <- cvSingleModalityAdmm(
 #'   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
 #'   numFolds = 5, typeMeasure = "rmse",
-#'   rho = 1, lambda1a = c(0.1, 0.5, 1), lambda1b = c(0.1, 0.3),
-#'   lambda1g = 2, lambda2a = 1, lambda2b = 1,
-#'   penalty = "PathwayLasso", penaltyParameterList = list(kappa = 1, nu = 2)
+#'   rho = c(0.9, 1, 1.1), lambda1a = c(0.1, 0.5, 1), lambda1b = c(0.1, 0.3),
+#'   lambda1g = c(1, 2), lambda2a = 1, lambda2b = 1,
+#'   penalty = "PathwayLasso", penaltyParameterList = list(kappa = c(0.5, 1), nu = c(1, 2))
 #' )
 #' @export
 cvSingleModalityAdmm <- function(

@@ -224,7 +224,7 @@ Rcpp::List singleModalityAdmmFit(
     nu = Rcpp::as<double>(penaltyParameters("nu"));
   }
 
-  int iter = 0, i;
+  int iter = 0;
   bool converged = false;
   Eigen::MatrixXd alpha = alphaInit, beta = betaInit, gamma = gammaInit;
   Eigen::MatrixXd alphaStep1 = Eigen::MatrixXd::Zero(1, p), betaStep2 = Eigen::MatrixXd::Zero(p, 1);
