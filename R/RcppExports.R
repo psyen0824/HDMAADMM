@@ -13,7 +13,7 @@ fMatChol <- function(X) {
     .Call('_HDMAADMM_fMatChol', PACKAGE = 'HDMAADMM', X)
 }
 
-singleModalityAdmmFit <- function(X, Y, M1, alphaInit, betaInit, gammaInit, rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b, penaltyType, penaltyParameters, maxIter, tol, verbose) {
-    .Call('_HDMAADMM_singleModalityAdmmFit', PACKAGE = 'HDMAADMM', X, Y, M1, alphaInit, betaInit, gammaInit, rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b, penaltyType, penaltyParameters, maxIter, tol, verbose)
+singleModalityAdmmFit <- function(X, Y, M1, alphaInit, betaInit, gammaInit, rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b, penaltyType, penaltyParameters, maxIter, tol, verbose, verboseNumIter, verboseNumAlpha, verboseNumBeta, verboseNumGamma) {
+    .Call('_HDMAADMM_singleModalityAdmmFit', PACKAGE = 'HDMAADMM', X, Y, M1, alphaInit, betaInit, gammaInit, rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b, penaltyType, penaltyParameters, maxIter, tol, verbose, verboseNumIter, verboseNumAlpha, verboseNumBeta, verboseNumGamma)
 }
 

@@ -18,9 +18,10 @@ singleModalityAdmm(
   penaltyParameterList = list(),
   SIS = FALSE,
   SISThreshold = 2,
-  maxIter = 3000,
+  maxIter = 3000L,
   tol = 0.001,
-  verbose = FALSE
+  verbose = FALSE,
+  verboseOptions = list(numIter = 10L, numAlpha = 1L, numBeta = 1L, numGamma = 1L)
 )
 }
 \arguments{
@@ -69,6 +70,14 @@ Elastic Net (\code{ElasticNet}), Pathway Lasso (\code{PathywayLasso}), and  Netw
 \item{tol}{The tolerence of convergence threshold. Default is \code{1e-3}.}
 
 \item{verbose}{A logical value to specify whether to print the iteration process.}
+
+\item{verboseOptions}{A list of values:
+\itemize{
+\item \code{numIter}: The number of iterations to print.
+\item \code{numAlpha}: The number of \code{alpha} to print.
+\item \code{numBeta}: The number of \code{beta} to print.
+\item \code{numGamma}: The number of \code{gamma} to print.
+}}
 }
 \value{
 A object, SingleModalityAdmm, with three elements.

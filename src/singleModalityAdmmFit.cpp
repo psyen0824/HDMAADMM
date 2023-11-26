@@ -169,6 +169,13 @@ Eigen::MatrixXd updateGammaFunc(
   return XtXInv * gammaTemp;
 }
 
+void printCoefficient(double *coef, std::string coefName, int numToPrint) {
+  int i;
+  for (i = 0; i < numToPrint; i++){
+    Rcpp::Rcout << ", " <<  coefName << "[" << i+1 << "]: " << coef[i];
+  }
+}
+
 // [[Rcpp::export]]
 Rcpp::List singleModalityAdmmFit(
     Eigen::Map<Eigen::MatrixXd> X,
@@ -187,9 +194,13 @@ Rcpp::List singleModalityAdmmFit(
     Rcpp::List penaltyParameters,
     int maxIter,
     double tol,
-    bool verbose
+    bool verbose,
+    int verboseNumIter,
+    int verboseNumAlpha,
+    int verboseNumBeta,
+    int verboseNumGamma
 ) {
-  int p = M1.cols();
+  int p = M1.cols(), numColsX = X.cols();
   Eigen::MatrixXd XtX = X.transpose() * X;
   Eigen::MatrixXd XtXInv = XtX.inverse();
   Eigen::MatrixXd XtM1 = X.transpose() * M1;
@@ -213,7 +224,7 @@ Rcpp::List singleModalityAdmmFit(
     nu = Rcpp::as<double>(penaltyParameters("nu"));
   }
 
-  int iter = 0;
+  int iter = 0, i;
   bool converged = false;
   Eigen::MatrixXd alpha = alphaInit, beta = betaInit, gamma = gammaInit;
   Eigen::MatrixXd alphaStep1 = Eigen::MatrixXd::Zero(1, p), betaStep2 = Eigen::MatrixXd::Zero(p, 1);
@@ -248,9 +259,20 @@ Rcpp::List singleModalityAdmmFit(
       ((betaStep2New - betaStep2).array().pow(2).sum() < tol);
 
     if (verbose) {
-      if (verbose && (iter % 10 == 0)) {
-        Rcpp::Rcout << "Iteration " << iter << ": is converged: " << converged <<
-          ", alpha[0]: " << alphaNew(0, 0) << ", beta[0]: " << betaNew(0, 0) << std::endl;
+      if (verbose && ((iter % verboseNumIter == 0) || converged)) {
+        std::string isConvergedString = converged?"yes":"no";
+        Rcpp::Rcout << std::fixed << std::setprecision(5);
+        Rcpp::Rcout << "Iteration " << iter << ": is converged: " << isConvergedString;
+        if (verboseNumGamma > 0) {
+          printCoefficient(gammaNew.data(), "gamma", std::min(verboseNumGamma, numColsX));
+        }
+        if (verboseNumAlpha > 0) {
+          printCoefficient(alphaNew.data(), "alpha", std::min(verboseNumAlpha, p));
+        }
+        if (verboseNumBeta > 0) {
+          printCoefficient(betaNew.data(), "beta", std::min(verboseNumBeta, p));
+        }
+        Rcpp::Rcout << std::endl;
       }
     }
 

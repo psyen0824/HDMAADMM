@@ -51,6 +51,13 @@
 #' @param maxIter The maximum iterations. Default is \code{3000}.
 #' @param tol The tolerence of convergence threshold. Default is \code{1e-3}.
 #' @param verbose A logical value to specify whether to print the iteration process.
+#' @param verboseOptions A list of values:
+#' \itemize{
+#'   \item \code{numIter}: The number of iterations to print.
+#'   \item \code{numAlpha}: The number of \code{alpha} to print.
+#'   \item \code{numBeta}: The number of \code{beta} to print.
+#'   \item \code{numGamma}: The number of \code{gamma} to print.
+#' }
 #' @examples
 #' ## Generate Empirical Data
 #' simuData <- modalityMediationDataGen(seed = 20231201, generateLaplacianMatrix = TRUE)
@@ -118,7 +125,8 @@ singleModalityAdmm <- function(
     rho = 1, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
     penalty = "ElasticNet", penaltyParameterList = list(),
     SIS = FALSE, SISThreshold = 2,
-    maxIter = 3000, tol = 1e-3, verbose = FALSE
+    maxIter = 3000L, tol = 1e-3, verbose = FALSE,
+    verboseOptions = list(numIter = 10L, numAlpha = 1L, numBeta = 1L, numGamma = 1L)
 ) {
   if (!is.matrix(X)) {
     X <- matrix(X, nrow = length(Y))
@@ -126,6 +134,15 @@ singleModalityAdmm <- function(
 
   if (!is.matrix(Y)) {
     Y <- matrix(Y, nrow = length(Y))
+  }
+
+  defaultVerboseOptions <- list(numIter = 10L, numAlpha = 1L, numBeta = 1L, numGamma = 1L)
+  for (nm in names(defaultVerboseOptions)) {
+    if (nm %in% names(verboseOptions)) {
+      verboseOptions[[nm]] <- as.integer(verboseOptions[[nm]])
+    } else {
+      verboseOptions[[nm]] <- defaultVerboseOptions[[nm]]
+    }
   }
 
   sisIndex <- 1:ncol(M1)
@@ -169,7 +186,8 @@ singleModalityAdmm <- function(
   fitResult <- singleModalityAdmmFit(
     XX, YY, MM1, alphaEst, betaEst, gammaEst,
     rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
-    penaltyType, penaltyParameterList, maxIter, tol, verbose
+    penaltyType, penaltyParameterList, as.integer(maxIter), tol, verbose,
+    verboseOptions$numIter, verboseOptions$numAlpha, verboseOptions$numBeta, verboseOptions$numGamma
   )
 
   if (fitResult$niter >= maxIter) {
