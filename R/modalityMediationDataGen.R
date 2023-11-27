@@ -149,17 +149,17 @@ modalityMediationDataGen <- function(
     )
 
   if (generateLaplacianMatrix) {
-    A <- matrix(0, p, p)
+    W <- matrix(0, p, p)
     for (i in 1:p) {
-      A[i, i] <- summary(lm(Y ~ M1[ ,i]))$r.squared
+      W[i, i] <- summary(lm(Y ~ M1[ ,i]))$r.squared
     }
     for (i in 1:(p-1)) {
       for (j in (i+1):p) {
-        A[i, j] <- summary(lm(Y ~ M1[ ,i] + M1[ ,j]))$r.squared
+        W[i, j] <- summary(lm(Y ~ M1[ ,i] + M1[ ,j]))$r.squared
       }
     }
-    A[lower.tri(A)] <- t(A)[lower.tri(A)]
-    out$Info$laplacianMatrix <- adjacencyToLaplacian(A)
+    W[lower.tri(W)] <- t(W)[lower.tri(W)]
+    out$Info$laplacianMatrix <- WeightToLaplacian(W)
   }
   return(out)
 }

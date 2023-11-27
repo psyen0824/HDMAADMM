@@ -16,9 +16,7 @@
 #'
 #' @param W The weight matrix for n nodes which should be \code{n}x\code{n} matrix.
 #' @return L \code{n}x\code{n} Laplacian matrix.
-#' @examples
-#' (W <- matrix(c(1, 1.5, 0, 1.5, 2, 0, 0, 0, 3), 3, 3))
-#' (L <- WeightToLaplacian(W))
+
 WeightToLaplacian <- function(W) {
   if ((nrow(W) != ncol(W)) || !isSymmetric(W)) {
     stop("W should be a square symmetric matrix.")

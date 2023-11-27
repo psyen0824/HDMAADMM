@@ -15,7 +15,3 @@ L \code{n}x\code{n} Laplacian matrix.
 \description{
 Helper function to convert Weight Matrix to Laplacian Matrix
 }
-\examples{
-(W <- matrix(c(1, 1.5, 0, 1.5, 2, 0, 0, 0, 3), 3, 3))
-(L <- WeightToLaplacian(W))
-}
