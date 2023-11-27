@@ -159,7 +159,7 @@ modalityMediationDataGen <- function(
       }
     }
     W[lower.tri(W)] <- t(W)[lower.tri(W)]
-    out$Info$laplacianMatrix <- WeightToLaplacian(W)
+    out$Info$laplacianMatrix <- weightToLaplacian(W)
   }
   return(out)
 }

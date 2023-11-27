@@ -16,8 +16,16 @@
 #'
 #' @param W The weight matrix for n nodes which should be \code{n}x\code{n} matrix.
 #' @return L \code{n}x\code{n} Laplacian matrix.
-
-WeightToLaplacian <- function(W) {
+#' @examples
+#' set.seed(20231201)
+#' p <- 5
+#' W <- matrix(0, nrow = p, ncol = p)
+#' W[lower.tri(W)] <- runif(p*(p-1)/2, 0, 1)
+#' W[upper.tri(W)] <- t(W)[upper.tri(W)]
+#' diag(W) <- 1
+#' (L <- weightToLaplacian(W))
+#' @export
+weightToLaplacian <- function(W) {
   if ((nrow(W) != ncol(W)) || !isSymmetric(W)) {
     stop("W should be a square symmetric matrix.")
   }

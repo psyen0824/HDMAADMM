@@ -120,13 +120,13 @@ modelNetwork <- singleModalityAdmm(
 )
 
 ## Parameter Estimation for Network penalty with a customized Laplacian matrix
-p <- 50
-setseed <- 20231201
+set.seed(20231201)
+p <- ncol(simuData$MediData$M1)
 W <- matrix(0, nrow = p, ncol = p)
-W[lower.tri(W)] <- runif(p, 0, 1)
+W[lower.tri(W)] <- runif(p*(p-1)/2, 0, 1)
 W[upper.tri(W)] <- t(W)[upper.tri(W)]
 diag(W) <- 1
-L <- WeightToLaplacian(W)
+L <- weightToLaplacian(W)
 modelNetwork <- singleModalityAdmm(
   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
