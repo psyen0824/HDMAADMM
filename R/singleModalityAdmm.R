@@ -217,8 +217,8 @@ singleModalityAdmm <- function(
   )
 
   out$loglik <- getLogLikelihood(
-    X, Y, M1, out$alpha, out$beta, matrix(out$gamma, 1, 1), out$interceptAlpha, out$interceptBeta
-  )
+    X, Y, M1, out$alpha, out$beta, matrix(out$gamma, 1, 1))
+
   M1Hat <- sweep(fMatProd(X, out$alpha), 2, out$interceptAlpha, `+`)
   out$fitted <- out$interceptBeta + fMatProd(X, out$gamma) + fMatProd(M1Hat, out$beta)
 
