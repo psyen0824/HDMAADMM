@@ -131,6 +131,34 @@ singleModalityAdmm <- function(
     Y <- matrix(Y, nrow = length(Y))
   }
 
+  if (any(is.na(X) | is.infinite(X))) {
+    stop("X should be finite non-nan numeric matrix")
+  }
+
+  if (any(is.na(Y) | is.infinite(Y))) {
+    stop("Y should be finite non-nan numeric matrix")
+  }
+
+  if (any(is.na(M1) | is.infinite(M1))) {
+    stop("M1 should be finite non-nan numeric matrix")
+  }
+
+  if (is.na(rho) || is.infinite(rho)) {
+    stop("rho should be finite non-nan numeric matrix")
+  }
+
+  if (is.na(lambda1b) || is.infinite(lambda1b)) {
+    stop("lambda1b should be finite non-nan numeric matrix")
+  }
+
+  if (is.na(lambda1a) || is.infinite(lambda1a)) {
+    stop("lambda1a should be finite non-nan numeric matrix")
+  }
+
+  if (any(is.na(lambda1g) || is.infinite(lambda1g))) {
+    stop("lambda1g should be finite non-nan numeric matrix")
+  }
+
   defaultVerboseOptions <- list(numIter = 10L, numAlpha = 1L, numBeta = 1L, numGamma = 1L)
   for (nm in names(defaultVerboseOptions)) {
     if (nm %in% names(verboseOptions)) {
@@ -140,10 +168,47 @@ singleModalityAdmm <- function(
     }
   }
 
+  if (penalty == "Network") {
+    if (!("laplacianMatrix" %in% names(penaltyParameterList))) {
+      stop("penaltyParameterList should contains laplacianMatrix for Network penalty")
+    }
+    if (any(is.na(penaltyParameterList$laplacianMatrix) | is.infinite(penaltyParameterList$laplacianMatrix))) {
+      stop("penaltyParameterList$laplacianMatrix should be finite non-nan numeric matrix")
+    }
+    if (is.na(lambda2a) | is.infinite(lambda2a)) {
+      stop("lambda2a should be finite non-nan numeric matrix")
+    }
+    if (any(is.na(lambda2b) | is.infinite(lambda2b))) {
+      stop("lambda2b should be finite non-nan numeric matrix")
+    }
+  } else if (penalty == "PathwayLasso") {
+    if (!("kappa" %in% names(penaltyParameterList)) || !("nu" %in% names(penaltyParameterList))) {
+      stop("penaltyParameterList should contains kappa and nu for PathwayLasso penalty")
+    }
+    if (is.na(penaltyParameterList$kappa) || is.infinite(penaltyParameterList$kappa)) {
+      stop("penaltyParameterList$kappa should be finite non-nan number")
+    }
+    if (is.na(penaltyParameterList$nu) || is.infinite(penaltyParameterList$nu)) {
+      stop("penaltyParameterList$nu should be finite non-nan number")
+    }
+  } else if (penalty == "ElasticNet") {
+    if (is.na(lambda2a) | is.infinite(lambda2a)) {
+      stop("lambda2a should be finite non-nan numeric matrix")
+    }
+    if (any(is.na(lambda2b) | is.infinite(lambda2b))) {
+      stop("lambda2b should be finite non-nan numeric matrix")
+    }
+  } else {
+    stop("No such penalty.")
+  }
+
   sisIndex <- 1:ncol(M1)
   if (SIS) {
     pearsonCors <- abs(cor(Y, M1))
     sisIndex <- which(rank(-pearsonCors) <= SISThreshold*nrow(M1)/log(nrow(M1)))
+    if (penalty == "Network") {
+      penaltyParameterList$laplacianMatrix <- penaltyParameterList$laplacianMatrix[sisIndex, sisIndex]
+    }
   }
 
   YY <- scale(Y)
@@ -154,30 +219,36 @@ singleModalityAdmm <- function(
   X.scale <- attr(XX,"scaled:scale")
 
   MM1 <- scale(M1[ , sisIndex])
-  M1.center <- attr(MM1,"scaled:center")
-  M1.scale <- attr(MM1,"scaled:scale")
+  M1.center <- attr(MM1, "scaled:center")
+  M1.scale <- attr(MM1, "scaled:scale")
 
   p <- ncol(MM1)
-
 
   gammaInit <- matrix(coef(lm(YY~XX+MM1))[2:(2+ncol(X)-1)], ncol=1)
   alphaInit <- coef(lm(MM1~XX))[2, , drop=FALSE]
   betaInit <- matrix(sapply(1:p, function(i) coef(lm(YY~XX+MM1[,i]))[3]), ncol=1)
 
-  if (penalty == "Network") {
-    if (!("laplacianMatrix" %in% names(penaltyParameterList))) {
-      stop("penaltyParameterList should contains laplacianMatrix for Network penalty")
+  if (verbose) {
+    if (verbose) {
+      msg <- sprintf("Iteration 0: is converged: no, ")
+      numGammaToPrint <- min(verboseOptions$numGamma, ncol(X))
+      gammaMsg <- ""
+      if (numGammaToPrint > 0) {
+        gammaMsg <- paste0(sprintf("gamma[%i]: %.5f", 1:numGammaToPrint, gammaInit[1:numGammaToPrint]), collapse = ", ")
+      }
+      numAlphaToPrint <- min(verboseOptions$numAlpha, ncol(X))
+      alphaMsg <- ""
+      if (numAlphaToPrint > 0) {
+        alphaMsg <- paste0(sprintf("alpha[%i]: %.5f", 1:numAlphaToPrint, alphaInit[1:numAlphaToPrint]), collapse = ", ")
+      }
+      numBetaToPrint <- min(verboseOptions$numBeta, ncol(X))
+      betaMsg <- ""
+      if (numBetaToPrint > 0) {
+        betaMsg <- paste0(sprintf("beta[%i]: %.5f", 1:numBetaToPrint, betaInit[1:numBetaToPrint]), collapse = ", ")
+      }
+      cat(msg, gammaMsg, alphaMsg, betaMsg, "\n")
     }
-  } else if (penalty == "PathwayLasso") {
-    if (!("kappa" %in% names(penaltyParameterList)) || !("nu" %in% names(penaltyParameterList))) {
-      stop("penaltyParameterList should contains kappa and nu for PathwayLasso penalty")
-    }
-  } else if (penalty == "ElasticNet") {
-    # do nothing
-  } else {
-    stop("No such penalty.")
   }
-
 
   XtX <- fMatTransProd(XX, XX)
   XtM1 <- fMatTransProd(XX, MM1)
