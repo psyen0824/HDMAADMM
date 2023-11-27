@@ -91,7 +91,7 @@
 #' p <- 50
 #' setseed <- 20231201
 #' W <- matrix(0, nrow = p, ncol = p)
-#' W[lower.tri(W)] <- runif(sum(lower.tri(W)), 0, 1)
+#' W[lower.tri(W)] <- runif(p, 0, 1)
 #' W[upper.tri(W)] <- t(W)[upper.tri(W)]
 #' diag(W) <- 1
 #' L <- WeightToLaplacian(W)
