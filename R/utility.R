@@ -30,7 +30,7 @@ adjacencyToLaplacian <- function(A) {
 }
 
 getLogLikelihood <- function(X, Y, M1, alpha, beta, gamma) {
-  A <- M1 - fMatProd(X, t(alpha))
+  A <- M1 - fMatProd(X, alpha)
   l1 <-  (-1/2)*  sum(diag(fMatTransProd(A, A)))
   B <- Y - fMatProd(X, gamma) - fMatProd(M1, beta)
   l2 <- (-1/2)*fMatTransProd(B, B)
