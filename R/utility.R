@@ -25,13 +25,13 @@ adjacencyToLaplacian <- function(A) {
   }
   d <- colSums(A)
   L <- -A / sqrt(d %o% d)
-  diag(L) <- 1.0
+  diag(L) <- diag(L) + 1.0
   return(L)
 }
 
 getLogLikelihood <- function(X, Y, M1, alpha, beta, gamma) {
   A <- M1 - fMatProd(X, alpha)
-  l1 <-  (-1/2)*  sum(diag(fMatTransProd(A, A)))
+  l1 <-  (-1/2) * sum(diag(fMatTransProd(A, A)))
   B <- Y - fMatProd(X, gamma) - fMatProd(M1, beta)
   l2 <- (-1/2)*fMatTransProd(B, B)
   return(list(l=as.numeric(l1+l2), l1=as.numeric(l1), l2=as.numeric(l2)))

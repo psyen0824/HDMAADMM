@@ -89,6 +89,25 @@ Eigen::MatrixXd fMatTransProd(SEXP X, SEXP Y, bool is_X_symmetric = false) {
 }
 
 // [[Rcpp::export]]
+Eigen::MatrixXd fMatInv(SEXP X, bool is_sym_pd = false) {
+  if (!(Rf_isMatrix(X) && (TYPEOF(X) == REALSXP || TYPEOF(X) == INTSXP || TYPEOF(X) == LGLSXP))) {
+    Rcpp::stop("'X' must be a numeric matrix");
+  }
+
+  if (Rf_nrows(X) != Rf_ncols(X)) {
+    Rcpp::stop("X must be a square matrix");
+  }
+
+  Eigen::Map<Eigen::MatrixXd> XMtd = Rcpp::as<Eigen::Map<Eigen::MatrixXd>>(cast_numeric(X));
+  if (is_sym_pd) {
+    Eigen::MatrixXd I = Eigen::MatrixXd::Identity(XMtd.rows(), XMtd.cols());
+    return XMtd.llt().solve(I);
+  } else {
+    return XMtd.inverse();
+  }
+}
+
+// [[Rcpp::export]]
 Eigen::MatrixXd fMatChol(SEXP X){
   if (!(Rf_isMatrix(X) && (TYPEOF(X) == REALSXP || TYPEOF(X) == INTSXP || TYPEOF(X) == LGLSXP))) {
     Rcpp::stop("'X' must be a numeric matrix");

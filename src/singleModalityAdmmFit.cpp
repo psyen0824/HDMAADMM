@@ -193,6 +193,13 @@ Rcpp::List singleModalityAdmmFit(
     int penaltyType,
     Rcpp::List penaltyParameters,
     int maxIter,
+    Eigen::Map<Eigen::MatrixXd> XtX,
+    Eigen::Map<Eigen::MatrixXd> XtXInv,
+    Eigen::Map<Eigen::MatrixXd> XtXPlusRhoInv,
+    Eigen::Map<Eigen::MatrixXd> XtM1,
+    Eigen::Map<Eigen::MatrixXd> M1tM1PlusRhoInv,
+    Eigen::Map<Eigen::MatrixXd> M1tY,
+    Eigen::Map<Eigen::MatrixXd> XtY,
     double tol,
     bool verbose,
     int verboseNumIter,
@@ -201,17 +208,6 @@ Rcpp::List singleModalityAdmmFit(
     int verboseNumGamma
 ) {
   int p = M1.cols(), numColsX = X.cols();
-  Eigen::MatrixXd XtX = X.transpose() * X;
-  Eigen::MatrixXd XtXInv = XtX.inverse();
-  Eigen::MatrixXd XtM1 = X.transpose() * M1;
-  Eigen::MatrixXd M1tY = M1.transpose() * Y;
-  Eigen::MatrixXd XtY = X.transpose() * Y;
-  Eigen::MatrixXd XtXPlusRho = XtX;
-  XtX.diagonal().array() += rho;
-  Eigen::MatrixXd XtXPlusRhoInv = XtXPlusRho.inverse();
-  Eigen::MatrixXd M1tM1PlusRho = M1.transpose() * M1;
-  M1tM1PlusRho.diagonal().array() += rho;
-  Eigen::MatrixXd M1tM1PlusRhoInv = M1tM1PlusRho.inverse();
 
   Eigen::MatrixXd laplacianMatrix = Eigen::MatrixXd::Identity(1, 1);
   if (penaltyType == 2) {

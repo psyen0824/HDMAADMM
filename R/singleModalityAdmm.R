@@ -182,11 +182,25 @@ singleModalityAdmm <- function(
     stop("No such penalty.")
   }
 
+  preCalcValues <- list(
+    XtX = fMatTransProd(XX, XX),
+    XtM1 = fMatTransProd(XX, MM1),
+    M1tM1PlusRhoInv = fMatInv(fMatTransProd(MM1, MM1) + rho*diag(p)),
+    M1tY = fMatTransProd(MM1, YY),
+    XtY = fMatTransProd(XX, YY)
+  )
+  preCalcValues$XtXInv <- fMatInv(preCalcValues$XtX)
+  preCalcValues$XtXPlusRhoInv <- fMatInv(preCalcValues$XtX + rho*diag(ncol(XX)), TRUE)
+
   penaltyType <- switch(penalty, ElasticNet = 1L, Network = 2L, PathwayLasso = 3L)
   fitResult <- singleModalityAdmmFit(
     XX, YY, MM1, alphaEst, betaEst, gammaEst,
     rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
-    penaltyType, penaltyParameterList, as.integer(maxIter), tol, verbose,
+    penaltyType, penaltyParameterList, as.integer(maxIter),
+    XtX=preCalcValues$XtX, XtXInv = preCalcValues$XtXInv,
+    XtXPlusRhoInv = preCalcValues$XtXPlusRhoInv, XtM1=preCalcValues$XtM1,
+    M1tM1PlusRhoInv=preCalcValues$M1tM1PlusRhoInv, M1tY=preCalcValues$M1tY,
+    XtY=preCalcValues$XtY, tol, verbose,
     verboseOptions$numIter, verboseOptions$numAlpha, verboseOptions$numBeta, verboseOptions$numGamma
   )
 
