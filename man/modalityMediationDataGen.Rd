@@ -37,6 +37,8 @@ and small mediated effects, generating from a normal distribution.}
 
 \item{gamma}{The true value of direct effect.}
 
+\item{generateLaplacianMatrix}{A logical value to specify whether to generate Laplacian matrix for network penalty.}
+
 \item{seed}{The random seed. Default is NULL to use the current seed.}
 }
 \value{
@@ -44,7 +46,7 @@ A object with three elements.
 \itemize{
 \item MediData: The simulated data for high-dimensional mediation model.
 \item MediPara: The true value for mediated effect and direct effect.
-\item Info : The output includes random seed and parameter setting for generating mediation model.
+\item Info : The output includes random seed, parameter setting, and Laplacian matrix for generating mediation model.
 }
 }
 \description{

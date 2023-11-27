@@ -84,7 +84,7 @@ A object, SingleModalityAdmm, with three elements.
 \itemize{
 \item gamma: estimated direct effect.
 \item alpha: estimate effect between mediator and independent variables.
-\item beta : estimate effect between mediator and dependent variables.
+\item beta : estimate effect between mediator and dependent variable.
 }
 }
 \description{
@@ -121,17 +121,9 @@ modelNetwork <- singleModalityAdmm(
 
 ## Parameter Estimation for Network penalty with a customized Laplacian matrix
 p <- 50
-A <- matrix(rep(0, p*p), p, p)
-A[1:10, 1:10] <- 1
-A[1:10, 21:30] <- 1
-A[21:30, 21:30] <- 1
-A[21:30, 1:10] <- 1
-A[11:20, 11:20] <- 1
-A[11:20, 31:50] <- 1
-A[31:50, 31:50] <- 1
-A[31:50, 11:20] <- 1
-diag(A) <- 0
-L <- adjacencyToLaplacian(A)
+setseed <- 20231201
+W <- matrix(runif(n = p^2, min = 0, max = 1), p, p)
+L <- WeightToLaplacian(W)
 modelNetwork <- singleModalityAdmm(
   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,

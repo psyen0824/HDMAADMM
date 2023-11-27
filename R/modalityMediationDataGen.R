@@ -30,12 +30,13 @@ rmvnorm <- function (n, mean, sigma = diag(length(mean))) {
 #' @param betaMean,betaSd The mean and SD vector of the effect between the mediator and dependent variable.
 #' @param sigmaM1 The covariance matrix of the error distribution among mediators. Default is \code{diag(p)}.
 #' @param gamma The true value of direct effect.
+#' @param generateLaplacianMatrix A logical value to specify whether to generate Laplacian matrix for network penalty.
 #' @param seed The random seed. Default is NULL to use the current seed.
 #' @return A object with three elements.
 #' \itemize{
 #'   \item MediData: The simulated data for high-dimensional mediation model.
 #'   \item MediPara: The true value for mediated effect and direct effect.
-#'   \item Info : The output includes random seed and parameter setting for generating mediation model.
+#'   \item Info : The output includes random seed, parameter setting, and Laplacian matrix for generating mediation model.
 #' }
 #' @examples
 #' simuData <- modalityMediationDataGen(seed = 20231201)
@@ -122,7 +123,7 @@ modalityMediationDataGen <- function(
   # X = Binary Exposure/Treatment/group: generate X from a Bernoulli distribution
   X <- matrix(as.numeric(dqrunif(n) > 0.5), nrow = n, byrow = TRUE)
 
-  # M1 = Structural Mediator ; number of mediators = p1
+  # M1 = Mediator ; number of mediators = p1
   M1 <- fMatProd(X, alpha) + rmvnorm(n = n, mean = rep(0, p), sigma = sigmaM1)
 
   # Y = Continuous Outcome Response

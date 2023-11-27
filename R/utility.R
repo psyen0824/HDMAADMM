@@ -12,19 +12,19 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-#' Helper function to convert Adjacency Matrix to Laplacian Matrix
+#' Helper function to convert Weight Matrix to Laplacian Matrix
 #'
-#' @param A The Adjacency matrix for n nodes which should be \code{n}x\code{n} matrix.
-#' @return A \code{n}x\code{n} Laplacian matrix.
+#' @param W The weight matrix for n nodes which should be \code{n}x\code{n} matrix.
+#' @return L \code{n}x\code{n} Laplacian matrix.
 #' @examples
-#' (A <- matrix(c(1, 1.5, 0, 1.5, 2, 0, 0, 0, 3), 3, 3))
-#' (L <- adjacencyToLaplacian(A))
-adjacencyToLaplacian <- function(A) {
-  if ((nrow(A) != ncol(A)) || !isSymmetric(A)) {
-    stop("A should be a square symmetric matrix.")
+#' (W <- matrix(c(1, 1.5, 0, 1.5, 2, 0, 0, 0, 3), 3, 3))
+#' (L <- WeightToLaplacian(W))
+WeightToLaplacian <- function(W) {
+  if ((nrow(W) != ncol(W)) || !isSymmetric(W)) {
+    stop("W should be a square symmetric matrix.")
   }
-  d <- colSums(A)
-  L <- -A / sqrt(d %o% d)
+  d <- colSums(W)
+  L <- -W / sqrt(d %o% d)
   diag(L) <- diag(L) + 1.0
   return(L)
 }
