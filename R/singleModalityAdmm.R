@@ -90,7 +90,10 @@
 #' ## Parameter Estimation for Network penalty with a customized Laplacian matrix
 #' p <- 50
 #' setseed <- 20231201
-#' W <- matrix(runif(n = p^2, min = 0, max = 1), p, p)
+#' W <- matrix(0, nrow = p, ncol = p)
+#' W[lower.tri(W)] <- runif(sum(lower.tri(W)), 0, 1)
+#' W[upper.tri(W)] <- t(W)[upper.tri(W)]
+#' diag(W) <- 1
 #' L <- WeightToLaplacian(W)
 #' modelNetwork <- singleModalityAdmm(
 #'   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
