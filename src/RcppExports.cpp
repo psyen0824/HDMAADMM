@@ -61,8 +61,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // singleModalityAdmmFit
-Rcpp::List singleModalityAdmmFit(Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> Y, Eigen::Map<Eigen::MatrixXd> M1, Eigen::Map<Eigen::MatrixXd> alphaInit, Eigen::Map<Eigen::MatrixXd> betaInit, Eigen::Map<Eigen::MatrixXd> gammaInit, double rho, double lambda1a, double lambda1b, double lambda1g, double lambda2a, double lambda2b, int penaltyType, Rcpp::List penaltyParameters, int maxIter, Eigen::Map<Eigen::MatrixXd> XtX, Eigen::Map<Eigen::MatrixXd> XtXInv, Eigen::Map<Eigen::MatrixXd> XtXPlusRhoInv, Eigen::Map<Eigen::MatrixXd> XtM1, Eigen::Map<Eigen::MatrixXd> M1tM1PlusRhoInv, Eigen::Map<Eigen::MatrixXd> M1tY, Eigen::Map<Eigen::MatrixXd> XtY, double tol, bool verbose, int verboseNumIter, int verboseNumAlpha, int verboseNumBeta, int verboseNumGamma);
-RcppExport SEXP _HDMAADMM_singleModalityAdmmFit(SEXP XSEXP, SEXP YSEXP, SEXP M1SEXP, SEXP alphaInitSEXP, SEXP betaInitSEXP, SEXP gammaInitSEXP, SEXP rhoSEXP, SEXP lambda1aSEXP, SEXP lambda1bSEXP, SEXP lambda1gSEXP, SEXP lambda2aSEXP, SEXP lambda2bSEXP, SEXP penaltyTypeSEXP, SEXP penaltyParametersSEXP, SEXP maxIterSEXP, SEXP XtXSEXP, SEXP XtXInvSEXP, SEXP XtXPlusRhoInvSEXP, SEXP XtM1SEXP, SEXP M1tM1PlusRhoInvSEXP, SEXP M1tYSEXP, SEXP XtYSEXP, SEXP tolSEXP, SEXP verboseSEXP, SEXP verboseNumIterSEXP, SEXP verboseNumAlphaSEXP, SEXP verboseNumBetaSEXP, SEXP verboseNumGammaSEXP) {
+Rcpp::List singleModalityAdmmFit(Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> Y, Eigen::Map<Eigen::MatrixXd> M1, Eigen::Map<Eigen::MatrixXd> alphaInit, Eigen::Map<Eigen::MatrixXd> betaInit, Eigen::Map<Eigen::MatrixXd> gammaInit, double rho, double lambda1a, double lambda1b, double lambda1g, double lambda2a, double lambda2b, int penaltyType, Rcpp::List penaltyParameters, Eigen::Map<Eigen::MatrixXd> XtX, Eigen::Map<Eigen::MatrixXd> XtXInv, Eigen::Map<Eigen::MatrixXd> XtXPlusRhoInv, Eigen::Map<Eigen::MatrixXd> XtM1, Eigen::Map<Eigen::MatrixXd> M1tM1PlusRhoInv, Eigen::Map<Eigen::MatrixXd> M1tY, Eigen::Map<Eigen::MatrixXd> XtY, int maxIter, double tol, bool verbose, int verboseNumIter, int verboseNumAlpha, int verboseNumBeta, int verboseNumGamma);
+RcppExport SEXP _HDMAADMM_singleModalityAdmmFit(SEXP XSEXP, SEXP YSEXP, SEXP M1SEXP, SEXP alphaInitSEXP, SEXP betaInitSEXP, SEXP gammaInitSEXP, SEXP rhoSEXP, SEXP lambda1aSEXP, SEXP lambda1bSEXP, SEXP lambda1gSEXP, SEXP lambda2aSEXP, SEXP lambda2bSEXP, SEXP penaltyTypeSEXP, SEXP penaltyParametersSEXP, SEXP XtXSEXP, SEXP XtXInvSEXP, SEXP XtXPlusRhoInvSEXP, SEXP XtM1SEXP, SEXP M1tM1PlusRhoInvSEXP, SEXP M1tYSEXP, SEXP XtYSEXP, SEXP maxIterSEXP, SEXP tolSEXP, SEXP verboseSEXP, SEXP verboseNumIterSEXP, SEXP verboseNumAlphaSEXP, SEXP verboseNumBetaSEXP, SEXP verboseNumGammaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -80,7 +80,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type lambda2b(lambda2bSEXP);
     Rcpp::traits::input_parameter< int >::type penaltyType(penaltyTypeSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type penaltyParameters(penaltyParametersSEXP);
-    Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type XtX(XtXSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type XtXInv(XtXInvSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type XtXPlusRhoInv(XtXPlusRhoInvSEXP);
@@ -88,13 +87,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type M1tM1PlusRhoInv(M1tM1PlusRhoInvSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type M1tY(M1tYSEXP);
     Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type XtY(XtYSEXP);
+    Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
     Rcpp::traits::input_parameter< int >::type verboseNumIter(verboseNumIterSEXP);
     Rcpp::traits::input_parameter< int >::type verboseNumAlpha(verboseNumAlphaSEXP);
     Rcpp::traits::input_parameter< int >::type verboseNumBeta(verboseNumBetaSEXP);
     Rcpp::traits::input_parameter< int >::type verboseNumGamma(verboseNumGammaSEXP);
-    rcpp_result_gen = Rcpp::wrap(singleModalityAdmmFit(X, Y, M1, alphaInit, betaInit, gammaInit, rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b, penaltyType, penaltyParameters, maxIter, XtX, XtXInv, XtXPlusRhoInv, XtM1, M1tM1PlusRhoInv, M1tY, XtY, tol, verbose, verboseNumIter, verboseNumAlpha, verboseNumBeta, verboseNumGamma));
+    rcpp_result_gen = Rcpp::wrap(singleModalityAdmmFit(X, Y, M1, alphaInit, betaInit, gammaInit, rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b, penaltyType, penaltyParameters, XtX, XtXInv, XtXPlusRhoInv, XtM1, M1tM1PlusRhoInv, M1tY, XtY, maxIter, tol, verbose, verboseNumIter, verboseNumAlpha, verboseNumBeta, verboseNumGamma));
     return rcpp_result_gen;
 END_RCPP
 }

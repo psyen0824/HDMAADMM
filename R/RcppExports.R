@@ -17,7 +17,7 @@ fMatChol <- function(X) {
     .Call('_HDMAADMM_fMatChol', PACKAGE = 'HDMAADMM', X)
 }
 
-singleModalityAdmmFit <- function(X, Y, M1, alphaInit, betaInit, gammaInit, rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b, penaltyType, penaltyParameters, maxIter, XtX, XtXInv, XtXPlusRhoInv, XtM1, M1tM1PlusRhoInv, M1tY, XtY, tol, verbose, verboseNumIter, verboseNumAlpha, verboseNumBeta, verboseNumGamma) {
-    .Call('_HDMAADMM_singleModalityAdmmFit', PACKAGE = 'HDMAADMM', X, Y, M1, alphaInit, betaInit, gammaInit, rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b, penaltyType, penaltyParameters, maxIter, XtX, XtXInv, XtXPlusRhoInv, XtM1, M1tM1PlusRhoInv, M1tY, XtY, tol, verbose, verboseNumIter, verboseNumAlpha, verboseNumBeta, verboseNumGamma)
+singleModalityAdmmFit <- function(X, Y, M1, alphaInit, betaInit, gammaInit, rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b, penaltyType, penaltyParameters, XtX, XtXInv, XtXPlusRhoInv, XtM1, M1tM1PlusRhoInv, M1tY, XtY, maxIter, tol, verbose, verboseNumIter, verboseNumAlpha, verboseNumBeta, verboseNumGamma) {
+    .Call('_HDMAADMM_singleModalityAdmmFit', PACKAGE = 'HDMAADMM', X, Y, M1, alphaInit, betaInit, gammaInit, rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b, penaltyType, penaltyParameters, XtX, XtXInv, XtXPlusRhoInv, XtM1, M1tM1PlusRhoInv, M1tY, XtY, maxIter, tol, verbose, verboseNumIter, verboseNumAlpha, verboseNumBeta, verboseNumGamma)
 }
 

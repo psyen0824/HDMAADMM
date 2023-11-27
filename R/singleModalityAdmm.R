@@ -164,9 +164,10 @@ singleModalityAdmm <- function(
 
   p <- ncol(MM1)
 
-  gammaEst <- matrix(coef(lm(YY~XX+MM1))[2:(2+ncol(X)-1)], ncol=1)
-  alphaEst <- coef(lm(MM1~XX))[2, , drop=FALSE]
-  betaEst <- matrix(sapply(1:p, function(i) coef(lm(YY~XX+MM1[,i]))[3]), ncol=1)
+
+  gammaInit <- matrix(coef(lm(YY~XX+MM1))[2:(2+ncol(X)-1)], ncol=1)
+  alphaInit <- coef(lm(MM1~XX))[2, , drop=FALSE]
+  betaInit <- matrix(sapply(1:p, function(i) coef(lm(YY~XX+MM1[,i]))[3]), ncol=1)
 
   if (penalty == "Network") {
     if (!("laplacianMatrix" %in% names(penaltyParameterList))) {
@@ -182,26 +183,25 @@ singleModalityAdmm <- function(
     stop("No such penalty.")
   }
 
-  preCalcValues <- list(
-    XtX = fMatTransProd(XX, XX),
-    XtM1 = fMatTransProd(XX, MM1),
-    M1tM1PlusRhoInv = fMatInv(fMatTransProd(MM1, MM1) + rho*diag(p)),
-    M1tY = fMatTransProd(MM1, YY),
-    XtY = fMatTransProd(XX, YY)
-  )
-  preCalcValues$XtXInv <- fMatInv(preCalcValues$XtX)
-  preCalcValues$XtXPlusRhoInv <- fMatInv(preCalcValues$XtX + rho*diag(ncol(XX)), TRUE)
+
+  XtX <- fMatTransProd(XX, XX)
+  XtM1 <- fMatTransProd(XX, MM1)
+  M1tM1PlusRhoInv <- fMatInv(fMatTransProd(MM1, MM1) + rho*diag(p))
+  M1tY <- fMatTransProd(MM1, YY)
+  XtY <- fMatTransProd(XX, YY)
+  XtXInv <- fMatInv(XtX)
+  XtXPlusRhoInv <- fMatInv(XtX + rho*diag(ncol(XX)), TRUE)
 
   penaltyType <- switch(penalty, ElasticNet = 1L, Network = 2L, PathwayLasso = 3L)
   fitResult <- singleModalityAdmmFit(
-    XX, YY, MM1, alphaEst, betaEst, gammaEst,
+    XX, YY, MM1, alphaInit, betaInit, gammaInit,
     rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
-    penaltyType, penaltyParameterList, as.integer(maxIter),
-    XtX=preCalcValues$XtX, XtXInv = preCalcValues$XtXInv,
-    XtXPlusRhoInv = preCalcValues$XtXPlusRhoInv, XtM1=preCalcValues$XtM1,
-    M1tM1PlusRhoInv=preCalcValues$M1tM1PlusRhoInv, M1tY=preCalcValues$M1tY,
-    XtY=preCalcValues$XtY, tol, verbose,
-    verboseOptions$numIter, verboseOptions$numAlpha, verboseOptions$numBeta, verboseOptions$numGamma
+    penaltyType=penaltyType, penaltyParameters=penaltyParameterList,
+    XtX=XtX, XtXInv=XtXInv, XtXPlusRhoInv=XtXPlusRhoInv, XtM1=XtM1,
+    M1tM1PlusRhoInv=M1tM1PlusRhoInv, M1tY=M1tY,XtY=XtY,
+    maxIter=as.integer(maxIter), tol=tol, verbose=verbose,
+    verboseNumIter=verboseOptions$numIter, verboseNumAlpha=verboseOptions$numAlpha,
+    verboseNumBeta=verboseOptions$numBeta, verboseNumGamma=verboseOptions$numGamma
   )
 
   if (fitResult$niter >= maxIter) {
