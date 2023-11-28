@@ -49,6 +49,7 @@ An \code{cvSingleModalityAdmm} object which is a matrix containing all the combi
 Cross Validation for High-dimensional Single Mediation Models
 }
 \examples{
+\dontrun{
 ## Generate Empirical Data
 simuData <- modalityMediationDataGen(seed = 20231201)
 
@@ -69,4 +70,5 @@ cvPathwayLassoResults <- cvSingleModalityAdmm(
   lambda1g = c(1, 2), lambda2a = 1, lambda2b = 1,
   penalty = "PathwayLasso", penaltyParameterList = list(kappa = c(0.5, 1), nu = c(1, 2))
 )
+}
 }
