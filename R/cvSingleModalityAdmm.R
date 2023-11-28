@@ -24,6 +24,7 @@
 #' @param penalty,SIS,SISThreshold,maxIter,tol,verbose,debug Please refer to the function, \code{\link{singleModalityAdmm}}.
 #' @return An \code{cvSingleModalityAdmm} object which is a matrix containing all the combinations of parameter sequences with an additional column called \code{measure}.
 #' @examples
+#' \dontrun{
 #' ## Generate Empirical Data
 #' simuData <- modalityMediationDataGen(seed = 20231201)
 #'
@@ -44,6 +45,7 @@
 #'   lambda1g = c(1, 2), lambda2a = 1, lambda2b = 1,
 #'   penalty = "PathwayLasso", penaltyParameterList = list(kappa = c(0.5, 1), nu = c(1, 2))
 #' )
+#' }
 #' @export
 cvSingleModalityAdmm <- function(
     X, Y, M1, numFolds = 10, typeMeasure = "rmse",
