@@ -224,9 +224,13 @@ singleModalityAdmm <- function(
 
   p <- ncol(MM1)
 
-  gammaInit <- matrix(coef(lm(YY~XX+MM1))[2:(2+ncol(X)-1)], ncol=1)
-  alphaInit <- coef(lm(MM1~XX))[2, , drop=FALSE]
-  betaInit <- matrix(sapply(1:p, function(i) coef(lm(YY~XX+MM1[,i]))[3]), ncol=1)
+  gammaInit <- elasticNetFit(cbind(XX, MM1), YY, rep(0, p+1), lambda1g, 0., maxIter, tol)$coef[1]
+  alphaInit <- matrix(sapply(1:p, function(i) {
+    elasticNetFit(XX, MM1[ , i], rep(0, 1), lambda1a, lambda2a, maxIter, tol)$coef[1]
+  }), nrow=1)
+  betaInit <- matrix(sapply(1:p, function(i) {
+    elasticNetFit(cbind(XX, MM1[ , i]), YY, rep(0, p+1), lambda1b, lambda2b, maxIter, tol)$coef[2]
+  }), ncol=1)
 
   if (verbose) {
     if (verbose) {
@@ -285,7 +289,7 @@ singleModalityAdmm <- function(
     alpha = alphaOut,
     beta = betaOut,
     gamma = gammaOut,
-    isConv = fitResult$niter < maxIter,
+    isConv = fitResult$converged,
     niter = fitResult$niter,
     interceptAlpha = colMeans(M1) - fMatProd(matrix(X.center, nrow=1), alphaOut),
     interceptBeta = as.numeric(

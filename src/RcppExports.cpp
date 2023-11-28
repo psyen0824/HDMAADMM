@@ -11,6 +11,26 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// elasticNetFit
+Rcpp::List elasticNetFit(Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::VectorXd> y, Eigen::Map<Eigen::VectorXd> coefInit, double lambda1, double lambda2, int maxIter, double tol, bool verbose, int verboseNumIter, int verboseNumCoef);
+RcppExport SEXP _HDMAADMM_elasticNetFit(SEXP XSEXP, SEXP ySEXP, SEXP coefInitSEXP, SEXP lambda1SEXP, SEXP lambda2SEXP, SEXP maxIterSEXP, SEXP tolSEXP, SEXP verboseSEXP, SEXP verboseNumIterSEXP, SEXP verboseNumCoefSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type coefInit(coefInitSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda1(lambda1SEXP);
+    Rcpp::traits::input_parameter< double >::type lambda2(lambda2SEXP);
+    Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    Rcpp::traits::input_parameter< int >::type verboseNumIter(verboseNumIterSEXP);
+    Rcpp::traits::input_parameter< int >::type verboseNumCoef(verboseNumCoefSEXP);
+    rcpp_result_gen = Rcpp::wrap(elasticNetFit(X, y, coefInit, lambda1, lambda2, maxIter, tol, verbose, verboseNumIter, verboseNumCoef));
+    return rcpp_result_gen;
+END_RCPP
+}
 // fMatProd
 Eigen::MatrixXd fMatProd(SEXP X, SEXP Y, bool is_X_symmetric);
 RcppExport SEXP _HDMAADMM_fMatProd(SEXP XSEXP, SEXP YSEXP, SEXP is_X_symmetricSEXP) {
@@ -100,6 +120,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_HDMAADMM_elasticNetFit", (DL_FUNC) &_HDMAADMM_elasticNetFit, 10},
     {"_HDMAADMM_fMatProd", (DL_FUNC) &_HDMAADMM_fMatProd, 3},
     {"_HDMAADMM_fMatTransProd", (DL_FUNC) &_HDMAADMM_fMatTransProd, 3},
     {"_HDMAADMM_fMatInv", (DL_FUNC) &_HDMAADMM_fMatInv, 2},
