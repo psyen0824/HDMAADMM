@@ -12,7 +12,7 @@ Rcpp::List elasticNetFit(
     double tol = 1e-3,
     bool verbose = false,
     int verboseNumIter = 10,
-    int verboseNumCoef = 0
+    int verboseNumCoef = 1
 ) {
   int n = X.rows(), p = X.cols(), iter = 0, j;
   bool converged = false;

@@ -270,6 +270,7 @@ Rcpp::List singleModalityAdmmFit(
     Rcpp::Named("alpha") = alphaNew,
     Rcpp::Named("beta") = betaNew,
     Rcpp::Named("gamma") = gammaNew,
-    Rcpp::Named("niter") = iter
+    Rcpp::Named("niter") = iter,
+    Rcpp::Named("converged") = converged
   );
 }

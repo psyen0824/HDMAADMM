@@ -289,7 +289,7 @@ singleModalityAdmm <- function(
     alpha = alphaOut,
     beta = betaOut,
     gamma = gammaOut,
-    isConv = fitResult$niter < maxIter,
+    isConv = fitResult$converged,
     niter = fitResult$niter,
     interceptAlpha = colMeans(M1) - fMatProd(matrix(X.center, nrow=1), alphaOut),
     interceptBeta = as.numeric(
