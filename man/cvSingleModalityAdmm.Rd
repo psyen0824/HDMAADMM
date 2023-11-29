@@ -49,7 +49,7 @@ An \code{cvSingleModalityAdmm} object which is a matrix containing all the combi
 Cross Validation for High-dimensional Single Mediation Models
 }
 \examples{
-\dontrun{
+\donttest{
 ## Generate Empirical Data
 simuData <- modalityMediationDataGen(seed = 20231201)
 

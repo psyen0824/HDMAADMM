@@ -11,10 +11,6 @@ Alternating Direction Method of Multipliers (ADMM) to provide high-dimensional m
 To improve the sensitivity and specificity of non-zero mediators,
 we offer the sure independence screening (SIS) function for dimension reduction.
 The available penalty options include Lasso, Elastic Net, Pathway Lasso, and Network-constrained Penalty.
-The methods employed in the package are based on Lasso (doi.org/10.1111/j.2517-6161.1996.tb02080.x),
-Elastic Net (doi.org/10.1111/j.1467-9868.2005.00503.x), Pathway Lasso (10.4310/21-sii673),
-Network Penalty (doi.org/10.1093/bioinformatics/btn081), ADMM (doi.org/10.1561/2200000016),
-and SIS (doi.org/10.1111/j.1467-9868.2008.00674.x).
 }
 \references{
 \enumerate{

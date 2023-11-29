@@ -24,7 +24,7 @@
 #' @param penalty,SIS,SISThreshold,maxIter,tol,verbose,debug Please refer to the function, \code{\link{singleModalityAdmm}}.
 #' @return An \code{cvSingleModalityAdmm} object which is a matrix containing all the combinations of parameter sequences with an additional column called \code{measure}.
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' ## Generate Empirical Data
 #' simuData <- modalityMediationDataGen(seed = 20231201)
 #'
