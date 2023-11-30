@@ -28,7 +28,7 @@ install.packages(
 remotes::install_github("psyen0824/HDMAADMM", ref = "oneMKL")
 ```
 
-examples
+Examples
 --------
 
 ``` r
@@ -43,3 +43,17 @@ modelElasticNet <- singleModalityAdmm(
 fitted(modelElasticNet)                              # fitted values
 predict(modelElasticNet, matrix(c(0, 1), ncol = 1))  # predict values
 ```
+
+Performance Comparison
+----------------------
+
+``` R
+Unit: seconds
+          category    mean neval
+Pure R              68.337     3
+RcppEigen           18.383     3
+RcppEigen + oneMKL   9.603     3
+
+# This results are run on R-4.3.1 (Windows 11 Pro 22H2) with Intel i9-13900K.
+```
+

@@ -131,6 +131,14 @@ singleModalityAdmm <- function(
     Y <- matrix(Y, nrow = length(Y))
   }
 
+  if ((nrow(X) != length(Y)) || (nrow(X) != nrow(M1))) {
+    stop("The length of Y should be equal to the rows of X and M1")
+  }
+
+  if ((length(rho) > 1) || (length(lambda1a) > 1) || (length(lambda1b) > 1) || (length(lambda1g) > 1) || (length(lambda2a) > 1) || (length(lambda2b) > 1)) {
+    stop("rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b should be scalar.")
+  }
+
   if (any(is.na(X) | is.infinite(X))) {
     stop("X should be finite non-nan numeric matrix")
   }
