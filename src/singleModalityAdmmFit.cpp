@@ -45,8 +45,11 @@ Eigen::MatrixXd upadteAlphaNetwork(
   double numerator, crossProd;
   Eigen::MatrixXd alphaNew = alpha;
   for (j = 0; j < p; j++) {
+
     crossProd = alphaNew(0, j) * laplacianMatrix(j, j) - alphaNew.row(0).dot(laplacianMatrix.col(j));
+
     numerator = softThreshold(lambda2a * crossProd + tauAlpha(0, j) + rho * alphaStep1(0, j), lambda1a);
+
     alphaNew(0, j) = numerator / (lambda2a * laplacianMatrix(j, j) + rho);
   }
   return alphaNew;
@@ -72,6 +75,7 @@ Eigen::MatrixXd upadteBetaNetwork(
   return betaNew;
 };
 
+%%%%%%%%%%%%
 std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> upadteAlphaBetaPasswayLasso(
     Eigen::MatrixXd alphaStep1,
     Eigen::MatrixXd betaStep2,
@@ -146,6 +150,112 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> upadteAlphaBetaPasswayLasso(
   return std::make_tuple(alphaNew, betaNew);
 };
 
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+  %%%%%%%%
+  std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> upadteAlphaBetaPasswayNetwork(
+      Eigen::MatrixXd alphaStep1,
+      Eigen::MatrixXd betaStep2,
+      Eigen::MatrixXd tauAlpha,
+      Eigen::MatrixXd tauBeta,
+      Eigen::MatrixXd laplacianMatrixA,
+      Eigen::MatrixXd laplacianMatrixB,
+      double rho,
+      double lambda1a,
+      double lambda1b,
+      double lambda2a,
+      double lambda2b,
+      double lambda2aStar,
+      double lambda2bStar,
+      double Wa1,
+      double Wa2,
+      double Wb1,
+      double Wb2,
+      double kappa
+  ) {
+    int p = alphaStep1.cols(), j;
+
+    Wa2 = lambda2a*lambda2aStar;
+    Wb2 = lambda2b*lambda2bStar;
+
+    double phi1 = 2*kappa*Wa2+rho, phi2 = 2*kappa*Wb2+rho;
+
+
+
+    double muAlpha, muBeta, denominator, numeratorAlpha, numeratorBeta;
+    Eigen::MatrixXd alphaNew(1, p), betaNew(p, 1);
+    for (j = 0; j < p; j++) {
+
+      Wa1 = lambda2a*alphaNew.col(0).dot(laplacianMatrixA.row(j));
+      Wa2 = lambda2b*betaNew.col(0).dot(laplacianMatrixB.row(j));
+
+      muAlpha = -kappa*Wa1 + tauAlpha(0, j) + rho*alphaStep1(0, j);
+      muBeta = -kappa*Wb1 + tauBeta(j, 0) + rho*betaStep2(j, 0);
+
+
+      if (kappa == 0.0) {
+        alphaNew(0, j) = softThreshold(muAlpha, lambda1a) / phi1;
+        betaNew(j, 0) = softThreshold(muBeta, lambda1b) / phi2;
+      } else {
+        denominator = phi1*phi2-kappa*kappa;
+
+        numeratorAlpha = phi2*(muAlpha-lambda1a)-kappa*(muBeta-lambda1b);
+        numeratorBeta = phi1*(muBeta-lambda1b)-kappa*(muAlpha-lambda1a);
+        if ((numeratorAlpha > 0) && (numeratorBeta > 0)) {
+          alphaNew(0, j) = numeratorAlpha / denominator;
+          betaNew(j, 0) = numeratorBeta / denominator;
+        } else {
+          numeratorAlpha = phi2*(muAlpha-lambda1a)+kappa*(muBeta+lambda1b);
+          numeratorBeta = phi1*(muBeta+lambda1b)+kappa*(muAlpha-lambda1a);
+          if ((numeratorAlpha > 0) && (numeratorBeta < 0)) {
+            alphaNew(0, j) = numeratorAlpha / denominator;
+            betaNew(j, 0) = numeratorBeta / denominator;
+          } else {
+            numeratorAlpha = phi2*(muAlpha+lambda1a)+kappa*(muBeta-lambda1b);
+            numeratorBeta = phi1*(muBeta-lambda1b)+kappa*(muAlpha+lambda1a);
+            if ((numeratorAlpha < 0) && (numeratorBeta > 0)) {
+              alphaNew(0, j) = numeratorAlpha / denominator;
+              betaNew(j, 0) = numeratorBeta / denominator;
+            } else {
+              numeratorAlpha = phi2*(muAlpha+lambda1a)-kappa*(muBeta+lambda1b);
+              numeratorBeta = phi1*(muBeta+lambda1b)-kappa*(muAlpha+lambda1a);
+              if ((numeratorAlpha < 0) && (numeratorBeta < 0)) {
+                alphaNew(0, j) = numeratorAlpha / denominator;
+                betaNew(j, 0) = numeratorBeta / denominator;
+              } else {
+                numeratorAlpha = abs(muAlpha) - lambda1a;
+                if ((numeratorAlpha > 0) && (phi1*abs(muBeta)-kappa*abs(muAlpha) <= phi1*lambda1b-kappa*lambda1a)) {
+                  alphaNew(0, j) = sgn(muAlpha) * numeratorAlpha / phi1;
+                  betaNew(j, 0) = 0.0;
+                } else {
+                  numeratorBeta = abs(muBeta) - lambda1b;
+                  if ((numeratorBeta > 0) && (phi2*abs(muAlpha)-kappa*abs(muBeta) <= phi2*lambda1a-kappa*lambda1b)) {
+                    alphaNew(0, j) = 0.0;
+                    betaNew(j, 0) = sgn(muBeta) * numeratorBeta / phi2;
+                  } else {
+                    alphaNew(0, j) = 0.0;
+                    betaNew(j, 0) = 0.0;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+   return std::make_tuple(alphaNew, betaNew);
+
+  };
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 Eigen::MatrixXd updateGammaFunc(
     Eigen::MatrixXd betaStep2,
     Eigen::MatrixXd XtXInv,
@@ -205,6 +315,27 @@ Rcpp::List singleModalityAdmmFit(
     nu = Rcpp::as<double>(penaltyParameters("nu"));
   }
 
+
+  %%%%%%%%%%%%%%%%%%%%%%%%%
+
+  double kappa = 0.0;
+  double lambda2aStar = 0.0;
+  double lambda2bStar = 0.0;
+  Eigen::MatrixXd laplacianMatrixA = Eigen::MatrixXd::Identity(1, 1);
+  Eigen::MatrixXd laplacianMatrixB = Eigen::MatrixXd::Identity(1, 1);
+
+  if (penaltyType == 4) {
+    kappa = Rcpp::as<double>(penaltyParameters("kappa"));
+    lambda2aStar = Rcpp::as<double>(penaltyParameters("lambda2aStar"));
+    lambda2bStar = Rcpp::as<double>(penaltyParameters("lambda2bStar"));
+    laplacianMatrixA = Rcpp::as<Eigen::MatrixXd>(penaltyParameters("laplacianMatrixA"));
+    laplacianMatrixB = Rcpp::as<Eigen::MatrixXd>(penaltyParameters("laplacianMatrixB"));
+  }
+
+
+  %%%%%%%%%%%%%%%%%%%%%%%%%
+
+
   int iter = 0;
   bool converged = false;
   Eigen::MatrixXd alpha = alphaInit, beta = betaInit, gamma = gammaInit;
@@ -226,6 +357,12 @@ Rcpp::List singleModalityAdmmFit(
       std::tie(alphaNew, betaNew) = upadteAlphaBetaPasswayLasso(
         alphaStep1New, betaStep2New, tauAlpha, tauBeta,
         rho, lambda1a, lambda1b, lambda2a, lambda2b, kappa, nu
+      );
+    } else if (penaltyType == 4) {
+      std::tie(alphaNew, betaNew) = upadteAlphaBetaPasswayNetwork(
+        laplacianMatrixA, laplacianMatrixB, lambda2aStar, lambda2bStar,
+        alphaStep1New, betaStep2New, tauAlpha, tauBeta,
+        rho, lambda1a, lambda1b, lambda2a, lambda2b, kappa
       );
     }
 

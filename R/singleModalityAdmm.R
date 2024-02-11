@@ -38,6 +38,12 @@
 #'   \itemize{
 #'     \item laplacianMatrix The Laplacian matrix applied on network penalty.
 #'   }
+#'   \item Penalty=\code{PathwayNetwork} needs five parameters.
+#'   \itemize{
+#'     \item kappa The L1-norm penalty for pathway Network
+#'     \item lambda2aStar and lambda2bStar The L2-norm penalty for pathway Network
+#'     \item laplacianMatrixA and laplacianMatrixB The Laplacian matrix applied on pathway Network penalty.
+#'   }
 #'   \item Penalty=\code{ElasticNet} don't need other parameters.
 #' }
 #' @return A object, SingleModalityAdmm, with three elements.
@@ -87,6 +93,14 @@
 #'   penalty = "Network", penaltyParameterList = list(laplacianMatrix = simuData$Info$laplacianMatrix)
 #' )
 #'
+#'#' ## Parameter Estimation for Pathway Network penalty
+#' modelPathwayNetwork <- singleModalityAdmm(
+#'   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
+#'   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
+#'   penalty = "PathwayNetwork", penaltyParameterList = list(kappa = 1, lambda2aStar = 1, lambda2bStar = 1,
+#'           laplacianMatrixA = simuData$Info$laplacianMatrixA, laplacianMatrixB = simuData$Info$laplacianMatrixB)
+#' )
+#'#'
 #' ## Parameter Estimation for Network penalty with a customized Laplacian matrix
 #' set.seed(20231201)
 #' p <- ncol(simuData$MediData$M1)
@@ -191,6 +205,31 @@ singleModalityAdmm <- function(
     if (is.na(penaltyParameterList$nu) || is.infinite(penaltyParameterList$nu)) {
       stop("penaltyParameterList$nu should be finite non-nan number")
     }
+  }  else if (penalty == "PathwayNetwork") {
+    if (!("kappa" %in% names(penaltyParameterList)) || !("lambda2aStar" %in% names(penaltyParameterList)) || !("lambda2bStar" %in% names(penaltyParameterList))  ) {
+      stop("penaltyParameterList should contains kappa, lambda2aStar and lambda2bStar for PathwayNetwork penalty")
+    }
+    if (is.na(penaltyParameterList$kappa) || is.infinite(penaltyParameterList$kappa)) {
+      stop("penaltyParameterList$kappa should be finite non-nan number")
+    }
+    if (is.na(penaltyParameterList$lambda2aStar) || is.infinite(penaltyParameterList$lambda2aStar)) {
+      stop("penaltyParameterList$lambda2aStar should be finite non-nan number")
+    }
+    if (is.na(penaltyParameterList$lambda2bStar) || is.infinite(penaltyParameterList$lambda2bStar)) {
+      stop("penaltyParameterList$lambda2bStar should be finite non-nan number")
+    }
+    if (!("laplacianMatrixA" %in% names(penaltyParameterList))) {
+      stop("penaltyParameterList should contains laplacianMatrixA for PathwayNetwork penalty")
+    }
+    if (any(is.na(penaltyParameterList$laplacianMatrixA) | is.infinite(penaltyParameterList$laplacianMatrixA))) {
+      stop("penaltyParameterList$laplacianMatrixA should be finite non-nan numeric matrix")
+    }
+    if (!("laplacianMatrixB" %in% names(penaltyParameterList))) {
+      stop("penaltyParameterList should contains laplacianMatrixB for PathwayNetwork penalty")
+    }
+    if (any(is.na(penaltyParameterList$laplacianMatrixB) | is.infinite(penaltyParameterList$laplacianMatrixB))) {
+      stop("penaltyParameterList$laplacianMatrixB should be finite non-nan numeric matrix")
+    }
   } else if (penalty == "ElasticNet") {
     if (is.na(lambda2a) | is.infinite(lambda2a)) {
       stop("lambda2a should be finite non-nan numeric matrix")
@@ -262,7 +301,7 @@ singleModalityAdmm <- function(
   XtXInv <- fMatInv(XtX)
   XtXPlusRhoInv <- fMatInv(XtX + rho*diag(ncol(XX)), TRUE)
 
-  penaltyType <- switch(penalty, ElasticNet = 1L, Network = 2L, PathwayLasso = 3L)
+  penaltyType <- switch(penalty, ElasticNet = 1L, Network = 2L, PathwayLasso = 3L, PathwayNetwork = 4L)
   fitResult <- singleModalityAdmmFit(
     XX, YY, MM1, alphaInit, betaInit, gammaInit,
     rho, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
