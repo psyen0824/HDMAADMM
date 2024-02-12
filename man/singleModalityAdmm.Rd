@@ -29,7 +29,7 @@ singleModalityAdmm(
 
 \item{Y}{The vector of dependent variable (outcome response).}
 
-\item{M1}{The single-modality mediator.}
+\item{M1}{The single modality mediator.}
 
 \item{rho}{The augmented Lagrangian parameter for ADMM.}
 
@@ -37,7 +37,7 @@ singleModalityAdmm(
 
 \item{lambda1b}{The L1-norm penalty for the effect between mediator and dependent variable.}
 
-\item{lambda1g}{The L1-norm penalty for the direct effect. Default is \strong{10} to adress overestimate issue.}
+\item{lambda1g}{The L1-norm penalty for the direct effect. Default is \strong{10} to address overestimate issue.}
 
 \item{lambda2a}{The L2-norm penalty for the effect between mediator and independent variables.
 It's not used when Penalty is \code{PathwayLasso}.}
@@ -49,16 +49,23 @@ It's not used when Penalty is \code{PathwayLasso}.}
 Elastic Net (\code{ElasticNet}), Pathway Lasso (\code{PathywayLasso}), and  Network-constrained Penalty (\code{Network}).}
 
 \item{penaltyParameterList}{\itemize{
-\item Penalty=\code{PathwayLasso} needs two parameters.
-\itemize{
-\item kappa The L1-norm penalty for pathway Lasso.
-\item nu The L2-norm penalty for pathway Lasso.
-}
+\item Penalty=\code{ElasticNet} don't need other parameters.
 \item Penalty=\code{Network} needs one parameter.
 \itemize{
 \item laplacianMatrix The Laplacian matrix applied on network penalty.
 }
-\item Penalty=\code{ElasticNet} don't need other parameters.
+\item Penalty=\code{PathwayLasso} needs two parameters.
+\itemize{
+\item kappa The L1-norm penalty for Pathway Lasso.
+\item nu The L2-norm penalty for Pathway Lasso.
+}
+\item Penalty=\code{PathwayNetwork} needs five parameters.
+\itemize{
+\item kappaN The L1-norm penalty for Pathway Network.
+\item lambda2a and lambda2b The L2-norm penalty for Pathway Network.
+\item laplacianMatrixA and laplacianMatrixB The L2-norm penalty for Pathway Network.
+}
+
 }}
 
 \item{SIS}{A logical value to specify whether to perform sure independence screening (SIS).}
@@ -67,7 +74,7 @@ Elastic Net (\code{ElasticNet}), Pathway Lasso (\code{PathywayLasso}), and  Netw
 
 \item{maxIter}{The maximum iterations. Default is \code{3000}.}
 
-\item{tol}{The tolerence of convergence threshold. Default is \code{1e-3}.}
+\item{tol}{The tolerance of convergence threshold. Default is \code{1e-3}.}
 
 \item{verbose}{A logical value to specify whether to print the iteration process.}
 
@@ -118,6 +125,7 @@ modelNetwork <- singleModalityAdmm(
   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
   penalty = "Network", penaltyParameterList = list(laplacianMatrix = simuData$Info$laplacianMatrix)
 )
+
 
 ## Parameter Estimation for Network penalty with a customized Laplacian matrix
 set.seed(20231201)

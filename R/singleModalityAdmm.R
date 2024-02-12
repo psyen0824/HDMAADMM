@@ -1,4 +1,4 @@
-## Copyright (C) 2023        Ching-Chuan Chen, Pei-Shan Yen
+## Copyright (C) 2023        Ching-Chuan Chen, Pei-Shan Yen Chia-Wei Kuo
 ##
 ## This file is part of HDMAADMM.
 ##
@@ -16,9 +16,9 @@
 #'
 #' @param X The matrix of independent variables (exposure/treatment/group).
 #' @param Y The vector of dependent variable (outcome response).
-#' @param M1 The single-modality mediator.
+#' @param M1 The single modality mediator.
 #' @param rho The augmented Lagrangian parameter for ADMM.
-#' @param lambda1g The L1-norm penalty for the direct effect. Default is \strong{10} to adress overestimate issue.
+#' @param lambda1g The L1-norm penalty for the direct effect. Default is \strong{10} to address overestimate issue.
 #' @param lambda1a The L1-norm penalty for the effect between mediator and independent variables.
 #' @param lambda1b The L1-norm penalty for the effect between mediator and dependent variable.
 #' @param lambda2a The L2-norm penalty for the effect between mediator and independent variables.
@@ -29,22 +29,23 @@
 #' Elastic Net (\code{ElasticNet}), Pathway Lasso (\code{PathywayLasso}), and  Network-constrained Penalty (\code{Network}).
 #' @param penaltyParameterList
 #' \itemize{
-#'   \item Penalty=\code{PathwayLasso} needs two parameters.
-#'   \itemize{
-#'     \item kappa The L1-norm penalty for pathway Lasso.
-#'     \item nu The L2-norm penalty for pathway Lasso.
-#'   }
+#'   \item Penalty=\code{ElasticNet} don't need other parameters.
 #'   \item Penalty=\code{Network} needs one parameter.
 #'   \itemize{
 #'     \item laplacianMatrix The Laplacian matrix applied on network penalty.
 #'   }
+#'   \item Penalty=\code{PathwayLasso} needs two parameters.
+#'   \itemize{
+#'     \item kappa The L1-norm penalty for Pathway Lasso.
+#'     \item nu The L2-norm penalty for Pathway Lasso.
+#'   }
 #'   \item Penalty=\code{PathwayNetwork} needs five parameters.
 #'   \itemize{
-#'     \item kappa The L1-norm penalty for pathway Network
-#'     \item lambda2aStar and lambda2bStar The L2-norm penalty for pathway Network
-#'     \item laplacianMatrixA and laplacianMatrixB The Laplacian matrix applied on pathway Network penalty.
+#'     \item kappaN The L1-norm penalty for Pathway Network.
+#'     \item lambda2a and lambda2b The L2-norm penalty for Pathway Network.
+#'     \item laplacianMatrixA and laplacianMatrixB The L2-norm penalty for Pathway Network.
 #'   }
-#'   \item Penalty=\code{ElasticNet} don't need other parameters.
+#'
 #' }
 #' @return A object, SingleModalityAdmm, with three elements.
 #' \itemize{
@@ -55,7 +56,7 @@
 #' @param SIS A logical value to specify whether to perform sure independence screening (SIS).
 #' @param SISThreshold The threshold value for the target reduced dimension for mediators. The default is "2," which reduces the dimension to 2*n/log(n).
 #' @param maxIter The maximum iterations. Default is \code{3000}.
-#' @param tol The tolerence of convergence threshold. Default is \code{1e-3}.
+#' @param tol The tolerance of convergence threshold. Default is \code{1e-3}.
 #' @param verbose A logical value to specify whether to print the iteration process.
 #' @param verboseOptions A list of values:
 #' \itemize{
@@ -93,14 +94,7 @@
 #'   penalty = "Network", penaltyParameterList = list(laplacianMatrix = simuData$Info$laplacianMatrix)
 #' )
 #'
-#'#' ## Parameter Estimation for Pathway Network penalty
-#' modelPathwayNetwork <- singleModalityAdmm(
-#'   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
-#'   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
-#'   penalty = "PathwayNetwork", penaltyParameterList = list(kappa = 1, lambda2aStar = 1, lambda2bStar = 1,
-#'           laplacianMatrixA = simuData$Info$laplacianMatrixA, laplacianMatrixB = simuData$Info$laplacianMatrixB)
-#' )
-#'#'
+#'
 #' ## Parameter Estimation for Network penalty with a customized Laplacian matrix
 #' set.seed(20231201)
 #' p <- ncol(simuData$MediData$M1)
@@ -190,7 +184,14 @@ singleModalityAdmm <- function(
     }
   }
 
-  if (penalty == "Network") {
+  if (penalty == "ElasticNet") {
+    if (is.na(lambda2a) | is.infinite(lambda2a)) {
+      stop("lambda2a should be finite non-nan numeric matrix")
+    }
+    if (any(is.na(lambda2b) | is.infinite(lambda2b))) {
+      stop("lambda2b should be finite non-nan numeric matrix")
+    }
+  } else if (penalty == "Network") {
     if (!("laplacianMatrix" %in% names(penaltyParameterList))) {
       stop("penaltyParameterList should contains laplacianMatrix for Network penalty")
     }
@@ -213,12 +214,12 @@ singleModalityAdmm <- function(
     if (is.na(penaltyParameterList$nu) || is.infinite(penaltyParameterList$nu)) {
       stop("penaltyParameterList$nu should be finite non-nan number")
     }
-  }  else if (penalty == "PathwayNetwork") {
-    if (!("kappa" %in% names(penaltyParameterList)) || !("lambda2aStar" %in% names(penaltyParameterList)) || !("lambda2bStar" %in% names(penaltyParameterList))  ) {
-      stop("penaltyParameterList should contains kappa, lambda2aStar and lambda2bStar for PathwayNetwork penalty")
+  } else if (penalty == "PathwayNetwork") {
+    if (!("kappaN" %in% names(penaltyParameterList)) || !("lambda2aStar" %in% names(penaltyParameterList)) || !("lambda2bStar" %in% names(penaltyParameterList))) {
+      stop("penaltyParameterList should contains kappaN, lambda2aStar, lambda2bStar for PathwayNetwork penalty")
     }
-    if (is.na(penaltyParameterList$kappa) || is.infinite(penaltyParameterList$kappa)) {
-      stop("penaltyParameterList$kappa should be finite non-nan number")
+    if (is.na(penaltyParameterList$kappaN) || is.infinite(penaltyParameterList$kappaN)) {
+      stop("penaltyParameterList$kappaN should be finite non-nan number")
     }
     if (is.na(penaltyParameterList$lambda2aStar) || is.infinite(penaltyParameterList$lambda2aStar)) {
       stop("penaltyParameterList$lambda2aStar should be finite non-nan number")
@@ -237,13 +238,6 @@ singleModalityAdmm <- function(
     }
     if (any(is.na(penaltyParameterList$laplacianMatrixB) | is.infinite(penaltyParameterList$laplacianMatrixB))) {
       stop("penaltyParameterList$laplacianMatrixB should be finite non-nan numeric matrix")
-    }
-  } else if (penalty == "ElasticNet") {
-    if (is.na(lambda2a) | is.infinite(lambda2a)) {
-      stop("lambda2a should be finite non-nan numeric matrix")
-    }
-    if (any(is.na(lambda2b) | is.infinite(lambda2b))) {
-      stop("lambda2b should be finite non-nan numeric matrix")
     }
   } else {
     stop("No such penalty.")
