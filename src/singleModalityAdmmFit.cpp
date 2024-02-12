@@ -174,8 +174,8 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> upadteAlphaBetaPathwayNetwork(
   Eigen::MatrixXd alphaNew(1, p), betaNew(p, 1);
   for (j = 0; j < p; j++) {
 
-    Wa1 = lambda2a*alphaNew.row(0).dot(laplacianMatrixA.col(j));
-    Wb1 = lambda2b*betaNew.row(0).dot(laplacianMatrixB.col(j));
+    Wa1 = lambda2a*laplacianMatrixA.row(j).dot(alphaNew.col(0));
+    Wb1 = lambda2b*laplacianMatrixB.row(j).dot(betaNew.col(0));
 
     muAlpha = -kappaN*Wa1 + tauAlpha(0, j) + rho*alphaStep1(0, j);
     muBeta = -kappaN*Wb1 + tauBeta(j, 0) + rho*betaStep2(j, 0);
