@@ -42,7 +42,7 @@
 #'   \item Penalty=\code{PathwayNetwork} needs five parameters.
 #'   \itemize{
 #'     \item kappaN The L1-norm penalty for Pathway Network.
-#'     \item lambda2a and lambda2b The L2-norm penalty for Pathway Network.
+#'     \item lambda2aStar and lambda2bStar The L2-norm penalty for Pathway Network.
 #'     \item laplacianMatrixA and laplacianMatrixB The L2-norm penalty for Pathway Network.
 #'   }
 #'
