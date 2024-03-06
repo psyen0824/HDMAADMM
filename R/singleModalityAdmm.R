@@ -30,7 +30,7 @@
 #' @param penaltyParameterList
 #' \itemize{
 #'   \item Penalty=\code{ElasticNet} don't need other parameters.
-#'   \item Penalty=\code{Network} needs one parameter.
+#'   \item Penalty=\code{Network} needs two parameters.
 #'   \itemize{
 #'     \item laplacianMatrixA and laplacianMatrixB The L2-norm penalty for Network.
 #'   }
@@ -45,7 +45,6 @@
 #'     \item lambda2aStar and lambda2bStar The L2-norm penalty for Pathway Network.
 #'     \item laplacianMatrixA and laplacianMatrixB The L2-norm penalty for Pathway Network.
 #'   }
-#'
 #' }
 #' @return A object, SingleModalityAdmm, with three elements.
 #' \itemize{
@@ -91,9 +90,20 @@
 #' modelNetwork <- singleModalityAdmm(
 #'   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
 #'   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
-#'   penalty = "Network", penaltyParameterList = list(laplacianMatrix = simuData$Info$laplacianMatrix)
+#'   penalty = "Network", penaltyParameterList = list(
+#'     laplacianMatrixA = simuData$Info$laplacianMatrix, laplacianMatrixB = simuData$Info$laplacianMatrix
+#'   )
 #' )
 #'
+#' ## Parameter Estimation for Pathway Network penalty
+#' modelPathwayNetwork <- singleModalityAdmm(
+#'   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
+#'   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
+#'   penalty = "Network", penaltyParameterList = list(
+#'     kappa = 1, lambda2aStar = 1, lambda2bStar = 1
+#'     laplacianMatrixA = simuData$Info$laplacianMatrix, laplacianMatrixB = simuData$Info$laplacianMatrix
+#'   )
+#' )
 #'
 #' ## Parameter Estimation for Network penalty with a customized Laplacian matrix
 #' set.seed(20231201)
@@ -106,7 +116,7 @@
 #' modelNetwork <- singleModalityAdmm(
 #'   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
 #'   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
-#'   penalty = "Network", penaltyParameterList = list(laplacianMatrix = L)
+#'   penalty = "Network", penaltyParameterList = list(laplacianMatrixA = L, laplacianMatrixB = L)
 #' )
 #'
 #' ## With sure independence screening
