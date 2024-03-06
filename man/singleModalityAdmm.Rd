@@ -40,10 +40,10 @@ singleModalityAdmm(
 \item{lambda1g}{The L1-norm penalty for the direct effect. Default is \strong{10} to address overestimate issue.}
 
 \item{lambda2a}{The L2-norm penalty for the effect between mediator and independent variables.
-It's not used when Penalty is \code{PathwayLasso}.}
+It's not used when Penalty is \code{PathwayLasso} which you can set it as 0.}
 
 \item{lambda2b}{The L2-norm penalty for the effect between mediator and dependent variable.
-It's not used when Penalty is \code{PathwayLasso}.}
+It's not used when Penalty is \code{PathwayLasso} which you can set it as 0.}
 
 \item{penalty}{A string to specify the penalty. Default is \code{ElasticNet}. Possible methods are
 Elastic Net (\code{ElasticNet}), Pathway Lasso (\code{PathywayLasso}), and  Network-constrained Penalty (\code{Network}).}

@@ -80,8 +80,6 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> upadteAlphaBetaPathwayLasso(
     double rho,
     double lambda1a,
     double lambda1b,
-    double lambda2a,
-    double lambda2b,
     double kappa,
     double nu
 ) {
@@ -325,7 +323,7 @@ Rcpp::List singleModalityAdmmFit(
     } else if (penaltyType == 3) {
       std::tie(alphaNew, betaNew) = upadteAlphaBetaPathwayLasso(
         alphaStep1New, betaStep2New, tauAlpha, tauBeta,
-        rho, lambda1a, lambda1b, lambda2a, lambda2b, kappa, nu
+        rho, lambda1a, lambda1b, kappa, nu
       );
     }  else if (penaltyType == 4) {
       std::tie(alphaNew, betaNew) = upadteAlphaBetaPathwayNetwork(

@@ -42,3 +42,15 @@ getLogLikelihood <- function(X, Y, M1, alpha, beta, gamma) {
   l2 <- (-1/2)*fMatTransProd(B, B)
   return(list(l=as.numeric(l1+l2), l1=as.numeric(l1), l2=as.numeric(l2)))
 }
+
+checkPenaltyParameterList <- function(ppl, parameterNames, penaltyName) {
+  for (pn in parameterNames) {
+    if (!(pn %in% names(ppl))) {
+      stop(sprintf("penaltyParameterList should contains %s for %s penalty!", pn, penaltyName))
+    }
+    if (any(is.na(ppl[[pn]]) | is.infinite(ppl[[pn]]))) {
+      stop(sprintf("penaltyParameterList$%s should be finite non-nan numeric for %s penalty!", pn, penaltyName))
+    }
+  }
+}
+
