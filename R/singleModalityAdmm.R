@@ -32,7 +32,7 @@
 #'   \item Penalty=\code{ElasticNet} don't need other parameters.
 #'   \item Penalty=\code{Network} needs one parameter.
 #'   \itemize{
-#'     \item laplacianMatrix The Laplacian matrix applied on network penalty.
+#'     \item laplacianMatrixA and laplacianMatrixB The L2-norm penalty for Network.
 #'   }
 #'   \item Penalty=\code{PathwayLasso} needs two parameters.
 #'   \itemize{
@@ -41,7 +41,7 @@
 #'   }
 #'   \item Penalty=\code{PathwayNetwork} needs five parameters.
 #'   \itemize{
-#'     \item kappaN The L1-norm penalty for Pathway Network.
+#'     \item kappa The L1-norm penalty for Pathway Network.
 #'     \item lambda2aStar and lambda2bStar The L2-norm penalty for Pathway Network.
 #'     \item laplacianMatrixA and laplacianMatrixB The L2-norm penalty for Pathway Network.
 #'   }
@@ -192,11 +192,14 @@ singleModalityAdmm <- function(
       stop("lambda2b should be finite non-nan numeric matrix")
     }
   } else if (penalty == "Network") {
-    if (!("laplacianMatrix" %in% names(penaltyParameterList))) {
-      stop("penaltyParameterList should contains laplacianMatrix for Network penalty")
+    if (!("laplacianMatrixA" %in% names(penaltyParameterList)) || !("laplacianMatrixA" %in% names(penaltyParameterList))) {
+      stop("penaltyParameterList should contains laplacianMatrixA and laplacianMatrixB for Network penalty")
     }
-    if (any(is.na(penaltyParameterList$laplacianMatrix) | is.infinite(penaltyParameterList$laplacianMatrix))) {
-      stop("penaltyParameterList$laplacianMatrix should be finite non-nan numeric matrix")
+    if (any(is.na(penaltyParameterList$laplacianMatrixA) | is.infinite(penaltyParameterList$laplacianMatrixA))) {
+      stop("penaltyParameterList$laplacianMatrixA should be finite non-nan numeric matrix")
+    }
+    if (any(is.na(penaltyParameterList$laplacianMatrixB) | is.infinite(penaltyParameterList$laplacianMatrixB))) {
+      stop("penaltyParameterList$laplacianMatrixB should be finite non-nan numeric matrix")
     }
     if (is.na(lambda2a) | is.infinite(lambda2a)) {
       stop("lambda2a should be finite non-nan numeric matrix")
@@ -215,11 +218,14 @@ singleModalityAdmm <- function(
       stop("penaltyParameterList$nu should be finite non-nan number")
     }
   } else if (penalty == "PathwayNetwork") {
-    if (!("kappaN" %in% names(penaltyParameterList)) || !("lambda2aStar" %in% names(penaltyParameterList)) || !("lambda2bStar" %in% names(penaltyParameterList))) {
-      stop("penaltyParameterList should contains kappaN, lambda2aStar, lambda2bStar for PathwayNetwork penalty")
+    if (!("kappa" %in% names(penaltyParameterList)) || !("lambda2aStar" %in% names(penaltyParameterList)) || !("lambda2bStar" %in% names(penaltyParameterList))) {
+      stop("penaltyParameterList should contains kappa, lambda2aStar, lambda2bStar for PathwayNetwork penalty")
     }
-    if (is.na(penaltyParameterList$kappaN) || is.infinite(penaltyParameterList$kappaN)) {
-      stop("penaltyParameterList$kappaN should be finite non-nan number")
+    if (!("laplacianMatrixA" %in% names(penaltyParameterList)) || !("laplacianMatrixB" %in% names(penaltyParameterList))) {
+      stop("penaltyParameterList should contains laplacianMatrixA and laplacianMatrixBfor PathwayNetwork penalty")
+    }
+    if (is.na(penaltyParameterList$kappa) || is.infinite(penaltyParameterList$kappa)) {
+      stop("penaltyParameterList$kappa should be finite non-nan number")
     }
     if (is.na(penaltyParameterList$lambda2aStar) || is.infinite(penaltyParameterList$lambda2aStar)) {
       stop("penaltyParameterList$lambda2aStar should be finite non-nan number")
@@ -227,14 +233,8 @@ singleModalityAdmm <- function(
     if (is.na(penaltyParameterList$lambda2bStar) || is.infinite(penaltyParameterList$lambda2bStar)) {
       stop("penaltyParameterList$lambda2bStar should be finite non-nan number")
     }
-    if (!("laplacianMatrixA" %in% names(penaltyParameterList))) {
-      stop("penaltyParameterList should contains laplacianMatrixA for PathwayNetwork penalty")
-    }
     if (any(is.na(penaltyParameterList$laplacianMatrixA) | is.infinite(penaltyParameterList$laplacianMatrixA))) {
       stop("penaltyParameterList$laplacianMatrixA should be finite non-nan numeric matrix")
-    }
-    if (!("laplacianMatrixB" %in% names(penaltyParameterList))) {
-      stop("penaltyParameterList should contains laplacianMatrixB for PathwayNetwork penalty")
     }
     if (any(is.na(penaltyParameterList$laplacianMatrixB) | is.infinite(penaltyParameterList$laplacianMatrixB))) {
       stop("penaltyParameterList$laplacianMatrixB should be finite non-nan numeric matrix")
