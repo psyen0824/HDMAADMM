@@ -41,6 +41,7 @@ rmvnorm <- function (n, mean, sigma = diag(length(mean))) {
 #' @examples
 #' simuData <- modalityMediationDataGen(seed = 20231201)
 #' @importFrom dqrng dqrunif dqrnorm dqset.seed
+#' @importFrom stats lm
 #' @export
 modalityMediationDataGen <- function(
     n = 100,

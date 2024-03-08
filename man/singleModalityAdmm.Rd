@@ -123,7 +123,8 @@ modelNetwork <- singleModalityAdmm(
   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
   penalty = "Network", penaltyParameterList = list(
-    laplacianMatrixA = simuData$Info$laplacianMatrix, laplacianMatrixB = simuData$Info$laplacianMatrix
+    laplacianMatrixA = simuData$Info$laplacianMatrix,
+    laplacianMatrixB = simuData$Info$laplacianMatrix
   )
 )
 
@@ -132,8 +133,9 @@ modelPathwayNetwork <- singleModalityAdmm(
   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
   penalty = "Network", penaltyParameterList = list(
-    kappa = 1, lambda2aStar = 1, lambda2bStar = 1
-    laplacianMatrixA = simuData$Info$laplacianMatrix, laplacianMatrixB = simuData$Info$laplacianMatrix
+    kappa = 1, lambda2aStar = 1, lambda2bStar = 1,
+    laplacianMatrixA = simuData$Info$laplacianMatrix,
+    laplacianMatrixB = simuData$Info$laplacianMatrix
   )
 )
 
@@ -148,7 +150,9 @@ L <- weightToLaplacian(W)
 modelNetwork <- singleModalityAdmm(
   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
-  penalty = "Network", penaltyParameterList = list(laplacianMatrixA = L, laplacianMatrixB = L)
+  penalty = "Network", penaltyParameterList = list(
+    laplacianMatrixA = L, laplacianMatrixB = L
+  )
 )
 
 ## With sure independence screening
