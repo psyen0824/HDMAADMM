@@ -142,15 +142,23 @@ singleModalityAdmm <- function(
     verboseOptions = list(numIter = 10L, numAlpha = 1L, numBeta = 1L, numGamma = 1L)
 ) {
   if (!is.matrix(X)) {
-    X <- matrix(X, nrow = length(Y))
+    X <- matrix(X, nrow = length(X))
   }
 
   if (!is.matrix(Y)) {
     Y <- matrix(Y, nrow = length(Y))
   }
 
+  if (ncol(X) != 1) {
+    stop("The number of columns of X should be 1.")
+  }
+
+  if (ncol(Y) != 1) {
+    stop("The number of columns of Y should be 1.")
+  }
+
   if ((nrow(X) != length(Y)) || (nrow(X) != nrow(M1))) {
-    stop("The length of Y should be equal to the rows of X and M1")
+    stop("The length of Y should be equal to the rows of X and M1.")
   }
 
   if ((length(rho) > 1) || (length(lambda1a) > 1) || (length(lambda1b) > 1) || (length(lambda1g) > 1) || (length(lambda2a) > 1) || (length(lambda2b) > 1)) {
@@ -170,27 +178,39 @@ singleModalityAdmm <- function(
   }
 
   if (is.na(rho) || is.infinite(rho)) {
-    stop("rho should be finite non-nan numeric matrix")
+    stop("rho should be finite non-nan numeric")
   }
 
   if (is.na(lambda1b) || is.infinite(lambda1b)) {
-    stop("lambda1b should be finite non-nan numeric matrix")
+    stop("lambda1b should be finite non-nan numeric")
   }
 
   if (is.na(lambda1a) || is.infinite(lambda1a)) {
-    stop("lambda1a should be finite non-nan numeric matrix")
+    stop("lambda1a should be finite non-nan numeric")
   }
 
   if (is.na(lambda2a) | is.infinite(lambda2a)) {
-    stop("lambda2a should be finite non-nan numeric matrix")
+    stop("lambda2a should be finite non-nan numeric")
   }
 
   if (any(is.na(lambda2b) | is.infinite(lambda2b))) {
-    stop("lambda2b should be finite non-nan numeric matrix")
+    stop("lambda2b should be finite non-nan numeric")
   }
 
   if (any(is.na(lambda1g) || is.infinite(lambda1g))) {
-    stop("lambda1g should be finite non-nan numeric matrix")
+    stop("lambda1g should be finite non-nan numeric")
+  }
+
+  if (any(is.na(SISThreshold) || is.infinite(SISThreshold))) {
+    stop("SISThreshold should be finite non-nan numeric")
+  }
+
+  if (any(is.na(maxIter) || is.infinite(maxIter))) {
+    stop("maxIter should be finite non-nan numeric")
+  }
+
+  if (any(is.na(tol) || is.infinite(tol))) {
+    stop("tol should be finite non-nan numeric")
   }
 
   defaultVerboseOptions <- list(numIter = 10L, numAlpha = 1L, numBeta = 1L, numGamma = 1L)
@@ -199,6 +219,12 @@ singleModalityAdmm <- function(
       verboseOptions[[nm]] <- as.integer(verboseOptions[[nm]])
     } else {
       verboseOptions[[nm]] <- defaultVerboseOptions[[nm]]
+    }
+  }
+
+  for (nm in names(verboseOptions)) {
+    if (any(is.na(verboseOptions[[nm]]) || is.infinite(verboseOptions[[nm]]))) {
+      stop(sprintf("%s should be finite non-nan numeric", nm))
     }
   }
 
