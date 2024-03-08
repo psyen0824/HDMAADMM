@@ -131,7 +131,7 @@
 #' )
 #' fitted(modelElasticNetSIS)
 #' predict(modelElasticNetSIS, matrix(c(0, 1), ncol=1))
-#' @importFrom stats lm coef cor
+#' @importFrom stats cor
 #' @export
 singleModalityAdmm <- function(
     X, Y, M1,
