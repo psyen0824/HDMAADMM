@@ -4,14 +4,24 @@
 \alias{generateLaplacianMatrix}
 \title{Function Generate Laplacian Matrix}
 \usage{
-generateLaplacianMatrix(X, Y, M1, method = "R-Squared", type = "beta")
+generateLaplacianMatrix(
+  X,
+  Y,
+  M1,
+  method = "R-Squared",
+  type = "beta",
+  interaction = FALSE
+)
 }
 \arguments{
 \item{X, Y, M1}{The input data for the single modality mediation model. Details see \code{\link{singleModalityAdmm}}.}
 
-\item{method}{A string to specify the method to generate Laplacian matrix. Available options are \code{R-Squared} and \code{p-value}.}
+\item{method}{A string to specify the method to generate Laplacian matrix. Available options are \code{R-Squared}, and \code{p-value}.}
 
 \item{type}{A string to specify the generated Laplacian matrix is for \eqn{\alpha} or \eqn{\beta}.}
+
+\item{interaction}{A logical value to specify whether to refer interation effect for \code{R-Squared} method.
+It's ignored when use \code{p-value} method.}
 }
 \description{
 Function Generate Laplacian Matrix
