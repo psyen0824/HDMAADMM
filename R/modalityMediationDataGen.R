@@ -30,7 +30,8 @@ rmvnorm <- function (n, mean, sigma = diag(length(mean))) {
 #' @param betaMean,betaSd The mean and SD vector of the effect between the mediator and dependent variable.
 #' @param sigmaM1 The covariance matrix of the error distribution among mediators. Default is \code{diag(p)}.
 #' @param gamma The true value of direct effect.
-#' @param generateLaplacianMatrix A logical value to specify whether to generate Laplacian matrix for network penalty.
+#' @param laplacianA,laplacianB Default is \code{NA_character_} which does not generate the laplacian matrix.
+#'  A string to specify the method to get the laplacian matrix for network penalty. \code{laplacianA} is for
 #' @param seed The random seed. Default is NULL to use the current seed.
 #' @return A object with three elements.
 #' \itemize{
@@ -54,7 +55,8 @@ modalityMediationDataGen <- function(
     betaSd = 0.1,
     sigmaM1 = NULL,
     gamma = 3,
-    generateLaplacianMatrix = FALSE,
+    laplacianA = NA_character_,
+    laplacianB = NA_character_,
     seed = 20231201
 ) {
   if (is.null(sigmaM1)) {
@@ -131,7 +133,7 @@ modalityMediationDataGen <- function(
   Y <- fMatProd(X, gamma) + fMatProd(M1, beta) + dqrnorm(n = n, mean = 0, sd = sigmaY)
 
   out <- list(
-      MediData = list(X = X, M1= M1,  Y=Y),
+      MediData = list(X = X, M1 = M1,  Y = Y),
       MediPara = list(alpha = alpha, beta = beta, gamma = gamma),
       Info = list(
         parameters = list(
@@ -144,23 +146,18 @@ modalityMediationDataGen <- function(
           sigmaM1 = sigmaM1
         ),
         trueValue = list(gamma = gamma),
-        laplacianMatrix = NULL,
+        laplacianMatrixA = NULL,
+        laplacianMatrixB = NULL,
         seed = seed
       )
     )
 
-  if (generateLaplacianMatrix) {
-    W <- matrix(0, p, p)
-    for (i in 1:p) {
-      W[i, i] <- summary(lm(Y ~ M1[ ,i]))$r.squared
-    }
-    for (i in 1:(p-1)) {
-      for (j in (i+1):p) {
-        W[i, j] <- summary(lm(Y ~ M1[ ,i] + M1[ ,j]))$r.squared
-      }
-    }
-    W[lower.tri(W)] <- t(W)[lower.tri(W)]
-    out$Info$laplacianMatrix <- weightToLaplacian(W)
+  if (!is.na(laplacianA)) {
+    out$Info$laplacianMatrixA <- generateLaplacianMatrix(X, Y, M1, laplacianA, type = "alpha")
+  }
+
+  if (!is.na(laplacianB)) {
+    out$Info$laplacianMatrixB <- generateLaplacianMatrix(X, Y, M1, laplacianB, type = "beta")
   }
   return(out)
 }

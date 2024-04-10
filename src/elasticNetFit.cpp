@@ -3,9 +3,9 @@
 
 // [[Rcpp::export]]
 Rcpp::List elasticNetFit(
-    Eigen::Map<Eigen::MatrixXd> X,
-    Eigen::Map<Eigen::VectorXd> y,
-    Eigen::Map<Eigen::VectorXd> coefInit,
+    Eigen::MatrixXd X,
+    Eigen::VectorXd y,
+    Eigen::VectorXd coefInit,
     double lambda1,
     double lambda2,
     int maxIter = 3000,
@@ -14,16 +14,16 @@ Rcpp::List elasticNetFit(
     int verboseNumIter = 10,
     int verboseNumCoef = 1
 ) {
-  int n = X.rows(), p = X.cols(), iter = 0, j;
+  int n = X.rows(), p = X.cols(), j, iter = 0;
   bool converged = false;
-  double obj = 0.0, objNew = 9999.0, l2p1 = lambda2 + 1;
+  double obj = 0.0, objNew = 9999.0, l2p1 = lambda2 + 1.0;
   Eigen::VectorXd rr = y - X * coefInit;
   Eigen::VectorXd coef = coefInit, coefNew = coefInit;
   while ((iter <= maxIter) && !converged) {
-    iter += 1;
+    ++iter;
     obj = objNew;
     coef = coefNew;
-    for (j = 0; j < p; j++) {
+    for (j = 0; j < p; ++j) {
       coefNew(j) = softThreshold(X.col(j).dot(rr) / n + coef(j) * l2p1, lambda1) / l2p1;
       rr -= (coefNew(j) - coef(j)) * X.col(j);
     }

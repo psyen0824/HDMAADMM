@@ -14,6 +14,22 @@
 
 #' High-dimensional Single Modality Mediation Models
 #'
+#' The single modality mediation model is expressed as below:
+#' \itemize{
+#'  \item Eq. 1: \eqn{M = X\alpha + \epsilon_{M}}
+#'  \item Eq. 2: \eqn{Y = X\gamma + M\beta + \epsilon_{Y}}
+#' }
+#' The penalty options are listed as below:
+#' \itemize{
+#'   \item Elastic Net: \eqn{\lambda_{1g}|\gamma|} + \eqn{\sum_{i=1}^p(\lambda_{1a}|\alpha_i|+\lambda_{1b}|\beta_i|)} + \eqn{\lambda_{2a}\alpha^T\alpha+\lambda_{2b}\beta^T\beta}
+#'   \item Pathway Lasso: \eqn{\lambda_{1g}|\gamma|} + \eqn{\sum_{i=1}^p(\lambda_{1a}|\alpha_i|+\lambda_{1b}|\beta_i|)} + \eqn{\kappa(\sum_{i=1}^p(|\alpha_i\beta_i|+\lambda_{2a}\alpha^T\alpha+\lambda_{2b}\beta^T\beta))}
+#'   \item Network: \eqn{\lambda_{1g}|\gamma|} + \eqn{\sum_{i=1}^p(\lambda_{1a}|\alpha_i|+\lambda_{1b}|\beta_i|)} + \eqn{\kappa(\sum_{i=1}^p(|\alpha_i\beta_i|+\lambda_{2a}\alpha^TL_{\alpha}\alpha+\lambda_{2b}\beta^TL_{\beta}\beta))}
+#'   \item Pathway Lasso: \eqn{\lambda_{1g}|\gamma|} + \eqn{\sum_{i=1}^p(\lambda_{1a}|\alpha_i|+\lambda_{1b}|\beta_i|)} + \eqn{\kappa(\sum_{i=1}^p(|\alpha_i\beta_i|+\lambda_{2a}\alpha^T\Sigma_{\alpha}\alpha+\lambda_{2b}\beta^T\Sigma_{\beta}\beta))}
+#'      where \eqn{\Sigma_{\alpha}=L_{\alpha}+\lambda_{2a}^*I_{p}}
+#'      and \eqn{\Sigma_{\beta}=L_{\beta}+\lambda_{2b}^*I_{p}}
+#' }
+#' which \eqn{L_{\alpha}} and \eqn{L_{\beta}} are the laplacian matrices which we use \code{laplacianMatrixA} and \code{laplacianMatrixB} to represent in the code.
+#'
 #' @param X The matrix of independent variables (exposure/treatment/group).
 #' @param Y The vector of dependent variable (outcome response).
 #' @param M1 The single modality mediator.
@@ -26,7 +42,8 @@
 #' @param lambda2b The L2-norm penalty for the effect between mediator and dependent variable.
 #'   It's not used when Penalty is \code{PathwayLasso} which you can set it as 0.
 #' @param penalty A string to specify the penalty. Default is \code{ElasticNet}. Possible methods are
-#' Elastic Net (\code{ElasticNet}), Pathway Lasso (\code{PathywayLasso}), and  Network-constrained Penalty (\code{Network}).
+#'   Elastic Net (\code{ElasticNet}), Pathway Lasso (\code{PathywayLasso}), Network-constrained Penalty (\code{Network}),
+#'   and Pathway Network (\code{PathwayNetwork}).
 #' @param penaltyParameterList
 #' \itemize{
 #'   \item Penalty=\code{ElasticNet} don't need other parameters.
@@ -140,10 +157,16 @@
 singleModalityAdmm <- function(
     X, Y, M1,
     rho = 1, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
-    penalty = "ElasticNet", penaltyParameterList = list(),
-    SIS = FALSE, SISThreshold = 2,
-    maxIter = 3000L, tol = 1e-3, verbose = FALSE,
-    verboseOptions = list(numIter = 10L, numAlpha = 1L, numBeta = 1L, numGamma = 1L)
+    penalty = "ElasticNet",
+    penaltyParameterList = list(),
+    SIS = FALSE,
+    SISThreshold = 2,
+    maxIter = 3000L,
+    tol = 1e-3,
+    verbose = FALSE,
+    verboseOptions = list(
+      numIter = 10L, numAlpha = 1L, numBeta = 1L, numGamma = 1L
+    )
 ) {
   if (!is.matrix(X)) {
     X <- matrix(X, nrow = length(X))

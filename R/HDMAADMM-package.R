@@ -29,9 +29,8 @@
 #'   \item Zhao, Y., & Luo, X. (2022). Pathway Lasso: pathway estimation and selection with high-dimensional mediators. Statistics and its interface, 15(1), 39.
 #' }
 #'
-#' @docType package
 #' @name HDMAADMM-package
 #' @useDynLib HDMAADMM
 #' @importFrom Rcpp evalCpp
 #' @importFrom RcppEigen RcppEigen.package.skeleton
-NULL
+"_PACKAGE"

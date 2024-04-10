@@ -11,7 +11,7 @@ Eigen::MatrixXd upadteAlphaElasticNet(
 ) {
   int p = alphaStep1.cols(), j;
   Eigen::MatrixXd alphaNew(1, p);
-  for (j = 0; j < p; j++) {
+  for (j = 0; j < p; ++j) {
     alphaNew(0, j) = softThreshold(tauAlpha(0, j) + rho*alphaStep1(0, j), lambda1a) / (lambda2a + rho);
   }
   return alphaNew;
@@ -26,7 +26,7 @@ Eigen::MatrixXd upadteBetaElasticNet(
 ) {
   int p = betaStep2.rows(), j;
   Eigen::MatrixXd betaNew(p, 1);
-  for (j = 0; j < p; j++) {
+  for (j = 0; j < p; ++j) {
     betaNew(j, 0) = softThreshold(tauBeta(j, 0) + rho*betaStep2(j, 0), lambda1b) / (lambda2b + rho);
   }
   return betaNew;
@@ -64,7 +64,7 @@ Eigen::MatrixXd upadteBetaNetwork(
   int p = beta.rows(), j;
   double numerator, crossProd;
   Eigen::MatrixXd betaNew = beta;
-  for (j = 0; j < p; j++) {
+  for (j = 0; j < p; ++j) {
     crossProd = betaNew(j, 0) * laplacianMatrixB(j, j) - betaNew.col(0).dot(laplacianMatrixB.col(j));
     numerator = softThreshold(lambda2b * crossProd + tauBeta(j, 0) + rho * betaStep2(j, 0), lambda1b);
     betaNew(j, 0) =  numerator / (lambda2b * laplacianMatrixB(j, j) + rho);
@@ -87,7 +87,7 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> upadteAlphaBetaPathwayLasso(
   double phi1 = 2*kappa*nu+rho, phi2 = 2*kappa*nu+rho;
   double muAlpha, muBeta, denominator, numeratorAlpha, numeratorBeta;
   Eigen::MatrixXd alphaNew(1, p), betaNew(p, 1);
-  for (j = 0; j < p; j++) {
+  for (j = 0; j < p; ++j) {
     muAlpha = tauAlpha(0, j) + rho*alphaStep1(0, j);
     muBeta = tauBeta(j, 0) + rho*betaStep2(j, 0);
 
@@ -172,7 +172,7 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> upadteAlphaBetaPathwayNetwork(
   double Wa1, Wb1;
 
   Eigen::MatrixXd alphaNew = alpha, betaNew = beta;
-  for (j = 0; j < p; j++) {
+  for (j = 0; j < p; ++j) {
 
     Wa1 = lambda2a*laplacianMatrixA.row(j).dot(alphaNew.row(0));
     Wb1 = lambda2b*laplacianMatrixB.row(j).dot(betaNew.col(0));
@@ -242,7 +242,7 @@ Eigen::MatrixXd updateGammaFunc(
 ) {
   int p = XtXInv.cols(), j;
   Eigen::MatrixXd gammaTemp = XtY - XtM1 * betaStep2;
-  for (j = 0; j < p; j++) {
+  for (j = 0; j < p; ++j) {
     gammaTemp(j, 0) = softThreshold(gammaTemp(j, 0), lambda1g);
   }
   return XtXInv * gammaTemp;
@@ -310,7 +310,7 @@ Rcpp::List singleModalityAdmmFit(
   Eigen::MatrixXd tauAlpha = Eigen::MatrixXd::Zero(1, p), tauBeta = Eigen::MatrixXd::Zero(p, 1);
   Eigen::MatrixXd alphaStep1New, betaStep2New, alphaNew, betaNew, gammaNew, tauAlphaNew, tauBetaNew;
   while ((iter <= maxIter) && !converged) {
-    iter += 1;
+    ++iter;
     alphaStep1New = XtXPlusRhoInv * (XtM1 + rho*alpha - tauAlpha);
     betaStep2New = M1tM1PlusRhoInv * (M1tY - XtM1.transpose() * gamma + rho*beta - tauBeta);
 
