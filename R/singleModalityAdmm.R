@@ -24,7 +24,7 @@
 #'   \item Elastic Net: \eqn{\lambda_{1g}|\gamma|} + \eqn{\sum_{i=1}^p(\lambda_{1a}|\alpha_i|+\lambda_{1b}|\beta_i|)} + \eqn{\lambda_{2a}\alpha^T\alpha+\lambda_{2b}\beta^T\beta}
 #'   \item Pathway Lasso: \eqn{\lambda_{1g}|\gamma|} + \eqn{\sum_{i=1}^p(\lambda_{1a}|\alpha_i|+\lambda_{1b}|\beta_i|)} + \eqn{\kappa(\sum_{i=1}^p(|\alpha_i\beta_i|+\lambda_{2a}\alpha^T\alpha+\lambda_{2b}\beta^T\beta))}
 #'   \item Network: \eqn{\lambda_{1g}|\gamma|} + \eqn{\sum_{i=1}^p(\lambda_{1a}|\alpha_i|+\lambda_{1b}|\beta_i|)} + \eqn{\kappa(\sum_{i=1}^p(|\alpha_i\beta_i|+\lambda_{2a}\alpha^TL_{\alpha}\alpha+\lambda_{2b}\beta^TL_{\beta}\beta))}
-#'   \item Pathway Lasso: \eqn{\lambda_{1g}|\gamma|} + \eqn{\sum_{i=1}^p(\lambda_{1a}|\alpha_i|+\lambda_{1b}|\beta_i|)} + \eqn{\kappa(\sum_{i=1}^p(|\alpha_i\beta_i|+\lambda_{2a}\alpha^T\Sigma_{\alpha}\alpha+\lambda_{2b}\beta^T\Sigma_{\beta}\beta))}
+#'   \item Pathway Network: \eqn{\lambda_{1g}|\gamma|} + \eqn{\sum_{i=1}^p(\lambda_{1a}|\alpha_i|+\lambda_{1b}|\beta_i|)} + \eqn{\kappa(\sum_{i=1}^p(|\alpha_i\beta_i|+\lambda_{2a}\alpha^T\Sigma_{\alpha}\alpha+\lambda_{2b}\beta^T\Sigma_{\beta}\beta))}
 #'      where \eqn{\Sigma_{\alpha}=L_{\alpha}+\lambda_{2a}^*I_{p}}
 #'      and \eqn{\Sigma_{\beta}=L_{\beta}+\lambda_{2b}^*I_{p}}
 #' }

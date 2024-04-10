@@ -35,6 +35,7 @@ nagelkerkeRSequared <- function(obj) {
 #' @param type A string to specify the generated Laplacian matrix is for \eqn{\alpha} or \eqn{\beta}.
 #' @param interaction A logical value to specify whether to refer interation effect for \code{R-Squared} method.
 #'  It's ignored when use \code{p-value} method.
+#' @export
 generateLaplacianMatrix <- function(X, Y, M1, method = "R-Squared", type = "beta", interaction = FALSE) {
   stopifnot(method %in% c("R-Squared", "p-value"), type %in% c("alpha", "beta"))
   p <- ncol(M1)

@@ -3,6 +3,7 @@
 S3method(fitted,SingleModalityAdmm)
 S3method(predict,SingleModalityAdmm)
 export(cvSingleModalityAdmm)
+export(generateLaplacianMatrix)
 export(modalityMediationDataGen)
 export(singleModalityAdmm)
 export(weightToLaplacian)
