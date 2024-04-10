@@ -12,14 +12,14 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // elasticNetFit
-Rcpp::List elasticNetFit(Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::VectorXd> y, Eigen::Map<Eigen::VectorXd> coefInit, double lambda1, double lambda2, int maxIter, double tol, bool verbose, int verboseNumIter, int verboseNumCoef);
+Rcpp::List elasticNetFit(Eigen::MatrixXd X, Eigen::VectorXd y, Eigen::VectorXd coefInit, double lambda1, double lambda2, int maxIter, double tol, bool verbose, int verboseNumIter, int verboseNumCoef);
 RcppExport SEXP _HDMAADMM_elasticNetFit(SEXP XSEXP, SEXP ySEXP, SEXP coefInitSEXP, SEXP lambda1SEXP, SEXP lambda2SEXP, SEXP maxIterSEXP, SEXP tolSEXP, SEXP verboseSEXP, SEXP verboseNumIterSEXP, SEXP verboseNumCoefSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type X(XSEXP);
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type coefInit(coefInitSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type coefInit(coefInitSEXP);
     Rcpp::traits::input_parameter< double >::type lambda1(lambda1SEXP);
     Rcpp::traits::input_parameter< double >::type lambda2(lambda2SEXP);
     Rcpp::traits::input_parameter< int >::type maxIter(maxIterSEXP);

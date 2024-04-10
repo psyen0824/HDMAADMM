@@ -2,6 +2,7 @@
 % Please edit documentation in R/HDMAADMM-package.R
 \docType{package}
 \name{HDMAADMM-package}
+\alias{HDMAADMM}
 \alias{HDMAADMM-package}
 \title{\code{HDMAADMM} Package}
 \description{
@@ -19,4 +20,21 @@ The available penalty options include Lasso, Elastic Net, Pathway Lasso, and Net
 \item Li, C., Li, H. (2008). Network-constrained regularization and variable selection for analysis of genomic data, Bioinformatics, 24(9), 1175–1182,
 \item Zhao, Y., & Luo, X. (2022). Pathway Lasso: pathway estimation and selection with high-dimensional mediators. Statistics and its interface, 15(1), 39.
 }
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/psyen0824/HDMAADMM}
+  \item Report bugs at \url{https://github.com/psyen0824/HDMAADMM/issues}
+}
+
+}
+\author{
+\strong{Maintainer}: Pei-Shan Yen \email{peishan0824@gmail.com} (\href{https://orcid.org/0000-0001-7386-0552}{ORCID})
+
+Authors:
+\itemize{
+  \item Ching-Chuan Chen \email{zw12356@gmail.com} (\href{https://orcid.org/0009-0007-8273-3206}{ORCID})
+}
+
 }

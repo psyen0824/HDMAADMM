@@ -15,7 +15,10 @@ modalityMediationDataGen(
   betaSd = 0.1,
   sigmaM1 = NULL,
   gamma = 3,
-  generateLaplacianMatrix = FALSE,
+  laplacianA = NA_character_,
+  laplacianB = NA_character_,
+  laplacianInteractionA = FALSE,
+  laplacianInteractionB = FALSE,
   seed = 20231201
 )
 }
@@ -37,7 +40,10 @@ and small mediated effects, generating from a normal distribution.}
 
 \item{gamma}{The true value of direct effect.}
 
-\item{generateLaplacianMatrix}{A logical value to specify whether to generate Laplacian matrix for network penalty.}
+\item{laplacianA, laplacianB}{Default is \code{NA_character_} which does not generate the laplacian matrix.
+A string to specify the method to get the laplacian matrix for network penalty. Details see \code{\link{generateLaplacianMatrix}}.}
+
+\item{laplacianInteractionA, laplacianInteractionB}{A logical value to specify to use interaction term. Details see \code{\link{generateLaplacianMatrix}}.}
 
 \item{seed}{The random seed. Default is NULL to use the current seed.}
 }
