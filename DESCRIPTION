@@ -1,8 +1,8 @@
 Package: HDMAADMM
 Type: Package
 Title: ADMM for High-Dimensional Mediation Models
-Version: 0.0.1
-Date: 2023-12-01
+Version: 0.0.2
+Date: 2024-06-22
 Authors@R: c(person(given = "Pei-Shan",
            family = "Yen", 
            email = "peishan0824@gmail.com",

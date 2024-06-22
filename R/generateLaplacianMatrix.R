@@ -37,60 +37,31 @@ nagelkerkeRSequared <- function(obj) {
 #'  It's ignored when use \code{p-value} method.
 #' @export
 #' @importFrom stats lm glm
-generateLaplacianMatrix <- function(X, Y, M1, method = "R-Squared", type = "beta", interaction = FALSE) {
-  stopifnot(method %in% c("R-Squared", "p-value"), type %in% c("alpha", "beta"))
+generateLaplacianMatrix <- function(X, Y, M1, type = "beta", interaction = FALSE) {
   p <- ncol(M1)
   W <- matrix(0, p, p)
   if (type == "beta") {
-    if (method == "R-Squared") {
-      for (i in 1:p) {
-        mdl <- lm(Y ~ M1[ ,i])
-        if (method == "R-Squared") {
-          W[i, i] <- summary(mdl)$r.squared
-        } else {
-          W[i, i] <- 1 - summary(mdl)$coefficients[2, 4]
-        }
-      }
-      for (i in 1:(p-1)) {
-        for (j in (i+1):p) {
-          if (interaction || (method == "p-value")) {
-            mdl <- lm(Y ~ M1[ ,i] * M1[ ,j])
-          } else {
-            mdl <- lm(Y ~ M1[ ,i] + M1[ ,j])
-          }
-          if (method == "R-Squared") {
-            W[i, j] <- summary(mdl)$r.squared
-          } else {
-            W[i, j] <- 1 - summary(mdl)$coefficients[4, 4]
-          }
-        }
-      }
-      W[lower.tri(W)] <- t(W)[lower.tri(W)]
-      return(weightToLaplacian(W))
-    } else {
-
-    }
-  } else {
     for (i in 1:p) {
-      mdl <- glm(X ~ M1[ ,i], family = "binomial")
-      if (method == "R-Squared") {
-        W[i, i] <- nagelkerkeRSequared(mdl)
-      } else {
-        W[i, i] <- 1 - summary(mdl)$coefficients[2, 4]
-      }
+      mdl <- lm(Y ~ M1[ ,i])
+      W[i, i] <- 1 - summary(mdl)$coefficients[2, 4]
     }
     for (i in 1:(p-1)) {
       for (j in (i+1):p) {
-        if (interaction || (method == "p-value")) {
-          mdl <- glm(X ~ M1[ ,i] * M1[ ,j], family = "binomial")
-        } else {
-          mdl <- glm(X ~ M1[ ,i] + M1[ ,j], family = "binomial")
-        }
-        if (method == "R-Squared") {
-          W[i, j] <- nagelkerkeRSequared(mdl)
-        } else {
-          W[i, j] <- 1 - summary(mdl)$coefficients[4, 4]
-        }
+        mdl <- lm(Y ~ M1[ ,i] * M1[ ,j])
+        W[i, j] <- 1 - summary(mdl)$coefficients[4, 4]
+      }
+    }
+    W[lower.tri(W)] <- t(W)[lower.tri(W)]
+    return(weightToLaplacian(W))
+  } else {
+    for (i in 1:p) {
+      mdl <- glm(X ~ M1[ ,i]  , family = "binomial")
+      W[i, i] <- 1 - summary(mdl)$coefficients[2, 4]
+    }
+    for (i in 1:(p-1)) {
+      for (j in (i+1):p) {
+        mdl <- glm(X ~ M1[ ,i] * M1[ ,j], family = "binomial")
+        W[i, j] <- 1 - summary(mdl)$coefficients[4, 4]
       }
     }
     W[lower.tri(W)] <- t(W)[lower.tri(W)]
