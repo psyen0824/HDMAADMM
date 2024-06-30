@@ -29,6 +29,9 @@
 #'      and \eqn{\Sigma_{\beta}=L_{\beta}+\lambda_{2b}^*I_{p}}
 #' }
 #' which \eqn{L_{\alpha}} and \eqn{L_{\beta}} are the laplacian matrices which we use \code{laplacianMatrixA} and \code{laplacianMatrixB} to represent in the code.
+#' Note that in the original work of the Pathway Lasso, certain restrictions are defined for the tuning parameters,
+#' including \eqn{\lambda_{1a} = \lambda_{1b}}, and \eqn{\lambda_{2a} = \lambda_{2b}}.
+#' In addition, \eqn{\lambda_{2a}} and \eqn{\lambda_{2b}} must be at least 0.5 to ensure that the penalty remains convex for optimization purpose.
 #'
 #' @param X The matrix of independent variables (exposure/treatment/group).
 #' @param Y The vector of dependent variable (outcome response).
@@ -38,9 +41,7 @@
 #' @param lambda1a The L1-norm penalty for the effect between mediator and independent variables.
 #' @param lambda1b The L1-norm penalty for the effect between mediator and dependent variable.
 #' @param lambda2a The L2-norm penalty for the effect between mediator and independent variables.
-#'   It's not used when Penalty is \code{PathwayLasso} which you can set it as 0.
 #' @param lambda2b The L2-norm penalty for the effect between mediator and dependent variable.
-#'   It's not used when Penalty is \code{PathwayLasso} which you can set it as 0.
 #' @param penalty A string to specify the penalty. Default is \code{ElasticNet}. Possible methods are
 #'   Elastic Net (\code{ElasticNet}), Pathway Lasso (\code{PathywayLasso}), Network-constrained Penalty (\code{Network}),
 #'   and Pathway Network (\code{PathwayNetwork}).
@@ -54,7 +55,6 @@
 #'   \item Penalty=\code{PathwayLasso} needs two parameters.
 #'   \itemize{
 #'     \item kappa The L1-norm penalty for Pathway Lasso.
-#'     \item nu The L2-norm penalty for Pathway Lasso.
 #'   }
 #'   \item Penalty=\code{PathwayNetwork} needs five parameters.
 #'   \itemize{
@@ -83,7 +83,7 @@
 #' }
 #' @examples
 #' ## Generate Empirical Data
-#' simuData <- modalityMediationDataGen(seed = 20231201, generateLaplacianMatrix = TRUE)
+#' simuData <- modalityMediationDataGen(seed = 20231201)
 #'
 #' ## Parameter Estimation for ElasticNet penalty
 #' modelElasticNet <- singleModalityAdmm(
@@ -100,7 +100,7 @@
 #' modelPathwayLasso <- singleModalityAdmm(
 #'   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
 #'   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
-#'   penalty = "PathwayLasso", penaltyParameterList = list(kappa = 1, nu = 2)
+#'   penalty = "PathwayLasso", penaltyParameterList = list(kappa = 1)
 #' )
 #'
 #' ## Parameter Estimation for Network penalty
@@ -108,8 +108,8 @@
 #'   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
 #'   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
 #'   penalty = "Network", penaltyParameterList = list(
-#'     laplacianMatrixA = simuData$Info$laplacianMatrix,
-#'     laplacianMatrixB = simuData$Info$laplacianMatrix
+#'     laplacianMatrixA = simuData$Info$laplacianMatrixA,
+#'     laplacianMatrixB = simuData$Info$laplacianMatrixB
 #'   )
 #' )
 #'
@@ -119,30 +119,36 @@
 #'   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
 #'   penalty = "Network", penaltyParameterList = list(
 #'     kappa = 1, lambda2aStar = 1, lambda2bStar = 1,
-#'     laplacianMatrixA = simuData$Info$laplacianMatrix,
-#'     laplacianMatrixB = simuData$Info$laplacianMatrix
+#'     laplacianMatrixA = simuData$Info$laplacianMatrixA,
+#'     laplacianMatrixB = simuData$Info$laplacianMatrixB
 #'   )
 #' )
 #'
 #' ## Parameter Estimation for Network penalty with a customized Laplacian matrix
 #' set.seed(20231201)
 #' p <- ncol(simuData$MediData$M1)
-#' W <- matrix(0, nrow = p, ncol = p)
-#' W[lower.tri(W)] <- runif(p*(p-1)/2, 0, 1)
-#' W[upper.tri(W)] <- t(W)[upper.tri(W)]
-#' diag(W) <- 1
-#' L <- weightToLaplacian(W)
+#' Wa <- matrix(0, nrow = p, ncol = p)
+#' Wa[lower.tri(Wa)] <- runif(p*(p-1)/2, 0, 1)
+#' Wa[upper.tri(Wa)] <- t(Wa)[upper.tri(Wa)]
+#' diag(Wa) <- 1
+#' La <- weightToLaplacian(Wa)
+#' Wb <- matrix(0, nrow = p, ncol = p)
+#' Wb[lower.tri(Wb)] <- runif(p*(p-1)/2, 0, 1)
+#' Wb[upper.tri(Wb)] <- t(Wb)[upper.tri(Wb)]
+#' diag(Wb) <- 1
+#' Lb <- weightToLaplacian(Wb)
 #' modelNetwork <- singleModalityAdmm(
 #'   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
 #'   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
 #'   penalty = "Network", penaltyParameterList = list(
-#'     laplacianMatrixA = L, laplacianMatrixB = L
+#'     laplacianMatrixA = La, laplacianMatrixB = Lb
 #'   )
 #' )
 #'
 #' ## With sure independence screening
-#' ## Generate Empirical Data
-#' simuData <- modalityMediationDataGen(n = 50, p = 1000, seed = 20231201)
+#' simuData <- modalityMediationDataGen(
+#'   n = 50, p = 1000, seed = 20231201, laplacianA = FALSE, laplacianB = FALSE
+#' )
 #'
 #' ## Parameter Estimation for ElasticNet penalty
 #' modelElasticNetSIS <- singleModalityAdmm(
@@ -262,9 +268,18 @@ singleModalityAdmm <- function(
   } else if (penalty == "Network") {
     checkPenaltyParameterList(penaltyParameterList, c("laplacianMatrixA", "laplacianMatrixB"), penalty)
   } else if (penalty == "PathwayLasso") {
-    checkPenaltyParameterList(penaltyParameterList, c("kappa", "nu"), penalty)
+    checkPenaltyParameterList(penaltyParameterList, c("kappa"), penalty)
+    if ((lambda2a < 0.5) || (lambda2b < 0.5)) {
+      stop("The tuning parameters lambda2a and lambda2b must be at least 0.5 to ensure that the penalty remains convex for optimization purpose.")
+    }
   } else if (penalty == "PathwayNetwork") {
     checkPenaltyParameterList(penaltyParameterList, c("kappa", "laplacianMatrixA", "laplacianMatrixB", "lambda2aStar", "lambda2bStar"), penalty)
+    if ((lambda2a < 0.5) || (lambda2b < 0.5)) {
+      stop("The tuning parameters lambda2a and lambda2b must be at least 0.5 to ensure that the penalty remains convex for optimization purpose.")
+    }
+    if ((penaltyParameterList$lambda2aStar < 1) || (penaltyParameterList$lambda2bStar < 1)) {
+      stop("The tuning parameters lambda2aStar and lambda2bStar must be at least 1 to ensure that the penalty remains convex for optimization purpose.")
+    }
   } else {
     stop("No such penalty.")
   }
@@ -274,7 +289,8 @@ singleModalityAdmm <- function(
     pearsonCors <- abs(cor(Y, M1))
     sisIndex <- which(rank(-pearsonCors) <= SISThreshold*nrow(M1)/log(nrow(M1)))
     if (penalty == "Network") {
-      penaltyParameterList$laplacianMatrix <- penaltyParameterList$laplacianMatrix[sisIndex, sisIndex]
+      penaltyParameterList$laplacianMatrixA <- penaltyParameterList$laplacianMatrixA[sisIndex, sisIndex]
+      penaltyParameterList$laplacianMatrixB <- penaltyParameterList$laplacianMatrixB[sisIndex, sisIndex]
     }
   }
 

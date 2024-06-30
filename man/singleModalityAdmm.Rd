@@ -39,11 +39,9 @@ singleModalityAdmm(
 
 \item{lambda1g}{The L1-norm penalty for the direct effect. Default is \strong{10} to address overestimate issue.}
 
-\item{lambda2a}{The L2-norm penalty for the effect between mediator and independent variables.
-It's not used when Penalty is \code{PathwayLasso} which you can set it as 0.}
+\item{lambda2a}{The L2-norm penalty for the effect between mediator and independent variables.}
 
-\item{lambda2b}{The L2-norm penalty for the effect between mediator and dependent variable.
-It's not used when Penalty is \code{PathwayLasso} which you can set it as 0.}
+\item{lambda2b}{The L2-norm penalty for the effect between mediator and dependent variable.}
 
 \item{penalty}{A string to specify the penalty. Default is \code{ElasticNet}. Possible methods are
 Elastic Net (\code{ElasticNet}), Pathway Lasso (\code{PathywayLasso}), Network-constrained Penalty (\code{Network}),
@@ -58,7 +56,6 @@ and Pathway Network (\code{PathwayNetwork}).}
 \item Penalty=\code{PathwayLasso} needs two parameters.
 \itemize{
 \item kappa The L1-norm penalty for Pathway Lasso.
-\item nu The L2-norm penalty for Pathway Lasso.
 }
 \item Penalty=\code{PathwayNetwork} needs five parameters.
 \itemize{
@@ -110,10 +107,13 @@ where \eqn{\Sigma_{\alpha}=L_{\alpha}+\lambda_{2a}^*I_{p}}
 and \eqn{\Sigma_{\beta}=L_{\beta}+\lambda_{2b}^*I_{p}}
 }
 which \eqn{L_{\alpha}} and \eqn{L_{\beta}} are the laplacian matrices which we use \code{laplacianMatrixA} and \code{laplacianMatrixB} to represent in the code.
+Note that in the original work of the Pathway Lasso, certain restrictions are defined for the tuning parameters,
+including \eqn{\lambda_{1a} = \lambda_{1b}}, and \eqn{\lambda_{2a} = \lambda_{2b}}.
+In addition, \eqn{\lambda_{2a}} and \eqn{\lambda_{2b}} must be at least 0.5 to ensure that the penalty remains convex for optimization purpose.
 }
 \examples{
 ## Generate Empirical Data
-simuData <- modalityMediationDataGen(seed = 20231201, generateLaplacianMatrix = TRUE)
+simuData <- modalityMediationDataGen(seed = 20231201)
 
 ## Parameter Estimation for ElasticNet penalty
 modelElasticNet <- singleModalityAdmm(
@@ -130,7 +130,7 @@ predict(modelElasticNet, matrix(c(0, 1), ncol=1))
 modelPathwayLasso <- singleModalityAdmm(
   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
-  penalty = "PathwayLasso", penaltyParameterList = list(kappa = 1, nu = 2)
+  penalty = "PathwayLasso", penaltyParameterList = list(kappa = 1)
 )
 
 ## Parameter Estimation for Network penalty
@@ -138,8 +138,8 @@ modelNetwork <- singleModalityAdmm(
   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
   penalty = "Network", penaltyParameterList = list(
-    laplacianMatrixA = simuData$Info$laplacianMatrix,
-    laplacianMatrixB = simuData$Info$laplacianMatrix
+    laplacianMatrixA = simuData$Info$laplacianMatrixA,
+    laplacianMatrixB = simuData$Info$laplacianMatrixB
   )
 )
 
@@ -149,30 +149,36 @@ modelPathwayNetwork <- singleModalityAdmm(
   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
   penalty = "Network", penaltyParameterList = list(
     kappa = 1, lambda2aStar = 1, lambda2bStar = 1,
-    laplacianMatrixA = simuData$Info$laplacianMatrix,
-    laplacianMatrixB = simuData$Info$laplacianMatrix
+    laplacianMatrixA = simuData$Info$laplacianMatrixA,
+    laplacianMatrixB = simuData$Info$laplacianMatrixB
   )
 )
 
 ## Parameter Estimation for Network penalty with a customized Laplacian matrix
 set.seed(20231201)
 p <- ncol(simuData$MediData$M1)
-W <- matrix(0, nrow = p, ncol = p)
-W[lower.tri(W)] <- runif(p*(p-1)/2, 0, 1)
-W[upper.tri(W)] <- t(W)[upper.tri(W)]
-diag(W) <- 1
-L <- weightToLaplacian(W)
+Wa <- matrix(0, nrow = p, ncol = p)
+Wa[lower.tri(Wa)] <- runif(p*(p-1)/2, 0, 1)
+Wa[upper.tri(Wa)] <- t(Wa)[upper.tri(Wa)]
+diag(Wa) <- 1
+La <- weightToLaplacian(Wa)
+Wb <- matrix(0, nrow = p, ncol = p)
+Wb[lower.tri(Wb)] <- runif(p*(p-1)/2, 0, 1)
+Wb[upper.tri(Wb)] <- t(Wb)[upper.tri(Wb)]
+diag(Wb) <- 1
+Lb <- weightToLaplacian(Wb)
 modelNetwork <- singleModalityAdmm(
   X = simuData$MediData$X, Y = simuData$MediData$Y, M1 = simuData$MediData$M1,
   rho = 1, lambda1a = 1, lambda1b = 0.1, lambda1g = 2, lambda2a = 1, lambda2b = 1,
   penalty = "Network", penaltyParameterList = list(
-    laplacianMatrixA = L, laplacianMatrixB = L
+    laplacianMatrixA = La, laplacianMatrixB = Lb
   )
 )
 
 ## With sure independence screening
-## Generate Empirical Data
-simuData <- modalityMediationDataGen(n = 50, p = 1000, seed = 20231201)
+simuData <- modalityMediationDataGen(
+  n = 50, p = 1000, seed = 20231201, laplacianA = FALSE, laplacianB = FALSE
+)
 
 ## Parameter Estimation for ElasticNet penalty
 modelElasticNetSIS <- singleModalityAdmm(

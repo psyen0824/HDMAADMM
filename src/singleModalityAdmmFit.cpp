@@ -81,10 +81,14 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> upadteAlphaBetaPathwayLasso(
     double lambda1a,
     double lambda1b,
     double kappa,
-    double nu
+    double lambda2a,
+    double lambda2b
 ) {
   int p = alphaStep1.cols(), j;
-  double phi1 = 2*kappa*nu+rho, phi2 = 2*kappa*nu+rho;
+  // To do a fair comparison, we introduce lambda2a, lambda2b to represent L2 norm penalty
+  double phi1 = 2*kappa*lambda2a+rho, phi2 = 2*kappa*lambda2b+rho;
+  // Below is the old code: using nu
+  // double phi1 = 2*kappa*nu+rho, phi2 = 2*kappa*nu+rho;
   double muAlpha, muBeta, denominator, numeratorAlpha, numeratorBeta;
   Eigen::MatrixXd alphaNew(1, p), betaNew(p, 1);
   for (j = 0; j < p; ++j) {
@@ -288,10 +292,9 @@ Rcpp::List singleModalityAdmmFit(
     laplacianMatrixB = Rcpp::as<Eigen::MatrixXd>(penaltyParameters("laplacianMatrixB"));
   }
 
-  double kappa = 0.0, nu = 0.0;
+  double kappa = 0.0;
   if (penaltyType == 3) {
     kappa = Rcpp::as<double>(penaltyParameters("kappa"));
-    nu = Rcpp::as<double>(penaltyParameters("nu"));
   }
 
   double lambda2aStar = 0.0, lambda2bStar = 0.0;
@@ -323,7 +326,7 @@ Rcpp::List singleModalityAdmmFit(
     } else if (penaltyType == 3) {
       std::tie(alphaNew, betaNew) = upadteAlphaBetaPathwayLasso(
         alphaStep1New, betaStep2New, tauAlpha, tauBeta,
-        rho, lambda1a, lambda1b, kappa, nu
+        rho, lambda1a, lambda1b, kappa, lambda2a, lambda2b
       );
     }  else if (penaltyType == 4) {
       std::tie(alphaNew, betaNew) = upadteAlphaBetaPathwayNetwork(

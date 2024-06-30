@@ -30,6 +30,7 @@ rmvnorm <- function (n, mean, sigma = diag(length(mean))) {
 #' @param betaMean,betaSd The mean and SD vector of the effect between the mediator and dependent variable.
 #' @param sigmaM1 The covariance matrix of the error distribution among mediators. Default is \code{diag(p)}.
 #' @param gamma The true value of direct effect.
+#' @param laplacianA,laplacianB Default is TRUE. These two logical values indicate whether to generate the laplacian matrix for network penalty. Details see \code{\link{generateLaplacianMatrix}}.
 #' @param laplacianInteractionA,laplacianInteractionB A logical value to specify to use interaction term. Details see \code{\link{generateLaplacianMatrix}}.
 #' @param seed The random seed. Default is NULL to use the current seed.
 #' @return A object with three elements.
@@ -54,8 +55,8 @@ modalityMediationDataGen <- function(
     betaSd = 0.1,
     sigmaM1 = NULL,
     gamma = 3,
-    laplacianA = NA_character_,
-    laplacianB = NA_character_,
+    laplacianA = TRUE,
+    laplacianB = TRUE,
     laplacianInteractionA = FALSE,
     laplacianInteractionB = FALSE,
     seed = 20231201
@@ -147,10 +148,19 @@ modalityMediationDataGen <- function(
           sigmaM1 = sigmaM1
         ),
         trueValue = list(gamma = gamma),
-        laplacianMatrixA = generateLaplacianMatrix(X, Y, M1, type = "alpha", interaction = laplacianInteractionA),
-        laplacianMatrixB = generateLaplacianMatrix(X, Y, M1, type = "beta", interaction = laplacianInteractionB),
+        laplacianMatrixA = NA_real_,
+        laplacianMatrixB = NA_real_,
         seed = seed
       )
     )
+
+  if (laplacianA) {
+    out$Info$laplacianMatrixA = generateLaplacianMatrix(X, Y, M1, type = "alpha", interaction = laplacianInteractionA)
+  }
+
+  if (laplacianB) {
+    out$Info$laplacianMatrixB = generateLaplacianMatrix(X, Y, M1, type = "beta", interaction = laplacianInteractionB)
+  }
+
   return(out)
 }
