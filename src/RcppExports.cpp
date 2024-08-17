@@ -31,6 +31,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// getLogLikelihood
+Rcpp::List getLogLikelihood(Eigen::MatrixXd X, Eigen::MatrixXd Y, Eigen::MatrixXd M1, Eigen::MatrixXd alpha, Eigen::MatrixXd beta, Eigen::MatrixXd gamma);
+RcppExport SEXP _HDMAADMM_getLogLikelihood(SEXP XSEXP, SEXP YSEXP, SEXP M1SEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP gammaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type Y(YSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type M1(M1SEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< Eigen::MatrixXd >::type gamma(gammaSEXP);
+    rcpp_result_gen = Rcpp::wrap(getLogLikelihood(X, Y, M1, alpha, beta, gamma));
+    return rcpp_result_gen;
+END_RCPP
+}
 // fMatProd
 Eigen::MatrixXd fMatProd(SEXP X, SEXP Y, bool is_X_symmetric);
 RcppExport SEXP _HDMAADMM_fMatProd(SEXP XSEXP, SEXP YSEXP, SEXP is_X_symmetricSEXP) {
@@ -121,6 +137,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_HDMAADMM_elasticNetFit", (DL_FUNC) &_HDMAADMM_elasticNetFit, 10},
+    {"_HDMAADMM_getLogLikelihood", (DL_FUNC) &_HDMAADMM_getLogLikelihood, 6},
     {"_HDMAADMM_fMatProd", (DL_FUNC) &_HDMAADMM_fMatProd, 3},
     {"_HDMAADMM_fMatTransProd", (DL_FUNC) &_HDMAADMM_fMatTransProd, 3},
     {"_HDMAADMM_fMatInv", (DL_FUNC) &_HDMAADMM_fMatInv, 2},

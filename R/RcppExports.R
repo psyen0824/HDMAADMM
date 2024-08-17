@@ -5,6 +5,10 @@ elasticNetFit <- function(X, y, coefInit, lambda1, lambda2, maxIter = 3000L, tol
     .Call('_HDMAADMM_elasticNetFit', PACKAGE = 'HDMAADMM', X, y, coefInit, lambda1, lambda2, maxIter, tol, verbose, verboseNumIter, verboseNumCoef)
 }
 
+getLogLikelihood <- function(X, Y, M1, alpha, beta, gamma) {
+    .Call('_HDMAADMM_getLogLikelihood', PACKAGE = 'HDMAADMM', X, Y, M1, alpha, beta, gamma)
+}
+
 fMatProd <- function(X, Y, is_X_symmetric = FALSE) {
     .Call('_HDMAADMM_fMatProd', PACKAGE = 'HDMAADMM', X, Y, is_X_symmetric)
 }

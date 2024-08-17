@@ -379,12 +379,9 @@ singleModalityAdmm <- function(
       Y.center - fMatProd(matrix(X.center, nrow=1), gammaOut) -
         fMatProd(fMatProd(matrix(X.center, nrow=1), alphaOut), betaOut)
     ),
-    loglik = 0.0,
+    loglik = fitResult$logLik,
     fitted = matrix(rep(0, nrow(M1)), ncol=1)
   )
-
-  out$loglik <- getLogLikelihood(
-    X, Y, M1, out$alpha, out$beta, matrix(out$gamma, 1, 1))
 
   M1Hat <- sweep(fMatProd(X, out$alpha), 2, out$interceptAlpha, `+`)
   out$fitted <- out$interceptBeta + fMatProd(X, out$gamma) + fMatProd(M1Hat, out$beta)

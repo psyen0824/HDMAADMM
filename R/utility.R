@@ -12,14 +12,6 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-getLogLikelihood <- function(X, Y, M1, alpha, beta, gamma) {
-  A <- M1 - fMatProd(X, alpha)
-  l1 <-  (-1/2) * sum(diag(fMatTransProd(A, A)))
-  B <- Y - fMatProd(X, gamma) - fMatProd(M1, beta)
-  l2 <- (-1/2)*fMatTransProd(B, B)
-  return(list(l=as.numeric(l1+l2), l1=as.numeric(l1), l2=as.numeric(l2)))
-}
-
 checkPenaltyParameterList <- function(ppl, parameterNames, penaltyName) {
   for (pn in parameterNames) {
     if (!(pn %in% names(ppl))) {

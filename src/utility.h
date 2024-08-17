@@ -1,6 +1,9 @@
 #include <RcppEigen.h>
 #include <iostream>
 
+#ifndef HDMAADMM__UTILITY__h
+#define HDMAADMM__UTILITY__h
+
 inline int sgn(double val) {
   return (val > 0.0) - (val < 0.0);
 }
@@ -15,3 +18,5 @@ inline void printCoefficient(double *coef, std::string coefName, int numToPrint)
     Rcpp::Rcout << ", " <<  coefName << "[" << i+1 << "]: " << coef[i];
   }
 }
+
+#endif

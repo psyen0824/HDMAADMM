@@ -1,6 +1,7 @@
 #include <RcppEigen.h>
 #include <tuple>
 #include "utility.h"
+#include "getLogLikehood.h"
 
 Eigen::MatrixXd upadteAlphaElasticNet(
     Eigen::MatrixXd alphaStep1,
@@ -350,7 +351,12 @@ Rcpp::List singleModalityAdmmFit(
       if (verbose && ((iter % verboseNumIter == 0) || converged)) {
         std::string isConvergedString = converged?"yes":"no";
         Rcpp::Rcout << std::fixed << std::setprecision(5);
-        Rcpp::Rcout << "Iteration " << iter << ": is converged: " << isConvergedString;
+        double objective = getObjective(
+          X, Y, M1, alphaNew, betaNew, gammaNew,
+          penaltyType, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
+          kappa, laplacianMatrixA, laplacianMatrixB, lambda2aStar, lambda2bStar
+        );
+        Rcpp::Rcout << "Iteration " << iter << ": is converged: " << isConvergedString << "; Objective: " << objective;
         if (verboseNumGamma > 0) {
           printCoefficient(gammaNew.data(), "gamma", std::min(verboseNumGamma, numColsX));
         }
@@ -372,11 +378,13 @@ Rcpp::List singleModalityAdmmFit(
     tauAlpha = tauAlphaNew;
     tauBeta = tauBetaNew;
   }
+  Rcpp::List logLikelihoodList = getLogLikelihood(X, Y, M1, alphaNew, betaNew, gammaNew);
 
   return Rcpp::List::create(
     Rcpp::Named("alpha") = alphaNew,
     Rcpp::Named("beta") = betaNew,
     Rcpp::Named("gamma") = gammaNew,
+    Rcpp::Named("logLik") = logLikelihoodList,
     Rcpp::Named("niter") = iter,
     Rcpp::Named("converged") = converged
   );
