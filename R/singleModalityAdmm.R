@@ -315,28 +315,6 @@ singleModalityAdmm <- function(
     elasticNetFit(cbind(XX, MM1[ , i]), YY, rep(0, p+1), lambda1b, lambda2b, maxIter, tol)$coef[2]
   }), ncol=1)
 
-  if (verbose) {
-    if (verbose) {
-      msg <- sprintf("Iteration 0: is converged: no, ")
-      numGammaToPrint <- min(verboseOptions$numGamma, ncol(X))
-      gammaMsg <- ""
-      if (numGammaToPrint > 0) {
-        gammaMsg <- paste0(sprintf("gamma[%i]: %.5f", 1:numGammaToPrint, gammaInit[1:numGammaToPrint]), collapse = ", ")
-      }
-      numAlphaToPrint <- min(verboseOptions$numAlpha, ncol(X))
-      alphaMsg <- ""
-      if (numAlphaToPrint > 0) {
-        alphaMsg <- paste0(sprintf("alpha[%i]: %.5f", 1:numAlphaToPrint, alphaInit[1:numAlphaToPrint]), collapse = ", ")
-      }
-      numBetaToPrint <- min(verboseOptions$numBeta, ncol(X))
-      betaMsg <- ""
-      if (numBetaToPrint > 0) {
-        betaMsg <- paste0(sprintf("beta[%i]: %.5f", 1:numBetaToPrint, betaInit[1:numBetaToPrint]), collapse = ", ")
-      }
-      cat(msg, gammaMsg, alphaMsg, betaMsg, "\n")
-    }
-  }
-
   XtX <- fMatTransProd(XX, XX)
   XtM1 <- fMatTransProd(XX, MM1)
   M1tM1PlusRhoInv <- fMatInv(fMatTransProd(MM1, MM1) + rho*diag(p))
@@ -367,6 +345,7 @@ singleModalityAdmm <- function(
   betaOut <- matrix(rep(0, pTrue), ncol=1)
   betaOut[sisIndex, ] <- fitResult$beta * Y.scale / M1.scale
   gammaOut <- fitResult$gamma * Y.scale/X.scale
+  temp <- c(alphaOut, betaOut, gammaOut)
 
   out <- list(
     alpha = alphaOut,
@@ -379,7 +358,8 @@ singleModalityAdmm <- function(
       Y.center - fMatProd(matrix(X.center, nrow=1), gammaOut) -
         fMatProd(fMatProd(matrix(X.center, nrow=1), alphaOut), betaOut)
     ),
-    loglik = fitResult$logLik,
+    logLik = fitResult$logLik,
+    BIC = fitResult$logLik + log(length(Y))*(length(temp) - sum(abs(temp) > 0)),
     fitted = matrix(rep(0, nrow(M1)), ncol=1)
   )
 

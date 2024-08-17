@@ -307,6 +307,17 @@ Rcpp::List singleModalityAdmmFit(
     laplacianMatrixB = Rcpp::as<Eigen::MatrixXd>(penaltyParameters("laplacianMatrixB"));
   }
 
+
+  if (verbose) {
+    Rcpp::Rcout << std::fixed << std::setprecision(5);
+    double objective = getObjective(
+      X, Y, M1, alphaInit, betaInit, gammaInit,
+      penaltyType, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
+      kappa, laplacianMatrixA, laplacianMatrixB, lambda2aStar, lambda2bStar
+    );
+    Rcpp::Rcout << "Iteration 0: is converged: no; Objective: " << objective << std::endl;
+  }
+
   int iter = 0;
   bool converged = false;
   Eigen::MatrixXd alpha = alphaInit, beta = betaInit, gamma = gammaInit;
@@ -350,7 +361,6 @@ Rcpp::List singleModalityAdmmFit(
     if (verbose) {
       if (verbose && ((iter % verboseNumIter == 0) || converged)) {
         std::string isConvergedString = converged?"yes":"no";
-        Rcpp::Rcout << std::fixed << std::setprecision(5);
         double objective = getObjective(
           X, Y, M1, alphaNew, betaNew, gammaNew,
           penaltyType, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
