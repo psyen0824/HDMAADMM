@@ -11,7 +11,7 @@
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-#include <RcppEigen.h>
+#include <oneMKL.h>
 
 SEXP cast_numeric(SEXP input) {
   if (!Rf_isReal(input)) {

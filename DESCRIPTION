@@ -21,9 +21,11 @@ Depends:
 Imports:
   Rcpp (>= 1.0.0),
   dqrng,
+  oneMKL,
   RcppEigen
 LinkingTo:
   Rcpp,
+  oneMKL,
   RcppEigen
 Suggests:
   testthat,
