@@ -334,14 +334,14 @@ Rcpp::List singleModalityAdmmFit(
   }
 
   // print objective for step 0 if verbose is true
+  double obj = getObjective(
+    X, Y, M1, alphaInit, betaInit, gammaInit,
+    penaltyType, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
+    kappa, laplacianMatrixA, laplacianMatrixB, lambda2aStar, lambda2bStar
+  ), objNew = 9999.0;
   if (verbose) {
     Rcpp::Rcout << std::fixed << std::setprecision(5);
-    double objective = getObjective(
-      X, Y, M1, alphaInit, betaInit, gammaInit,
-      penaltyType, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
-      kappa, laplacianMatrixA, laplacianMatrixB, lambda2aStar, lambda2bStar
-    );
-    Rcpp::Rcout << "Iteration 0: is converged: no; Objective: " << objective;
+    Rcpp::Rcout << "Iteration 0: is converged: no; Objective: " << obj;
     Rcpp::Rcout << "; gammaConv: 0, alphaConv: 0, betaConv: 0" << std::endl;
   }
 
@@ -381,24 +381,33 @@ Rcpp::List singleModalityAdmmFit(
     tauAlphaNew = tauAlpha + rho * (alphaStep1New - alphaNew);
     tauBetaNew = tauBeta + rho * (betaStep2New - betaNew);
 
+    // get new objective value
+    /*
+    objNew = getObjective(
+      X, Y, M1, alphaNew, betaNew, gammaNew,
+      penaltyType, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
+      kappa, laplacianMatrixA, laplacianMatrixB, lambda2aStar, lambda2bStar
+    );
+    */
+
     // check convergence
     gammaConv = ((gammaNew - gamma).array().pow(2).sum() < tol);
     alphaConv = ((alphaStep1New - alphaNew).array().pow(2).sum() < tol) &&
       ((alphaStep1New - alphaStep1).array().pow(2).sum() < tol);
     betaConv = ((betaStep2New - betaNew).array().pow(2).sum() < tol) &&
       ((betaStep2New - betaStep2).array().pow(2).sum() < tol);
-    converged = gammaConv && alphaConv && betaConv;
+    converged = (gammaConv && alphaConv && betaConv); // || ((std::abs((objNew - obj) / objNew) < tol * 1e-2) && (iter >= 3));
 
     // print coefs and objective if verbose is true
     if (verbose) {
       if (verbose && ((iter % verboseNumIter == 0) || converged)) {
         std::string isConvergedString = converged?"yes":"no";
-        double objective = getObjective(
-          X, Y, M1, alphaNew, betaNew, gammaNew,
+        objNew = getObjective(
+          X, Y, M1, alphaInit, betaInit, gammaInit,
           penaltyType, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
           kappa, laplacianMatrixA, laplacianMatrixB, lambda2aStar, lambda2bStar
         );
-        Rcpp::Rcout << "Iteration " << iter << ": is converged: " << isConvergedString << "; Objective: " << objective;
+        Rcpp::Rcout << "Iteration " << iter << ": is converged: " << isConvergedString << "; Objective: " << objNew;
         Rcpp::Rcout << "; gammaConv: " << gammaConv << ", alphaConv: " << alphaConv << ", betaConv: " << betaConv;
         if (verboseNumGamma > 0) {
           printCoefficient(gammaNew.data(), "gamma", std::min(verboseNumGamma, numColsX));
@@ -421,7 +430,9 @@ Rcpp::List singleModalityAdmmFit(
     gamma = gammaNew;
     tauAlpha = tauAlphaNew;
     tauBeta = tauBetaNew;
+    obj = objNew;
   }
+
   // calculate log likelihood
   Rcpp::List logLikelihoodList = getLogLikelihood(X, Y, M1, alphaNew, betaNew, gammaNew);
 

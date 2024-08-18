@@ -33,7 +33,7 @@ Rcpp::List elasticNetFit(
     }
 
     objNew = rr.array().pow(2).sum()/n + lambda1 * coefNew.array().abs().sum() + lambda2 * coefNew.dot(coefNew) / 2.0;
-    converged = (std::abs(objNew - obj) / objNew < tol);
+    converged = (std::abs((objNew - obj) / objNew) < tol) && (iter >= 3);
 
     // print objective and variables if verbose is true
     if (verbose) {

@@ -355,8 +355,8 @@ singleModalityAdmm <- function(
       Y.center - fMatProd(matrix(X.center, nrow=1), gammaOut) -
         fMatProd(fMatProd(matrix(X.center, nrow=1), alphaOut), betaOut)
     ),
-    logLik = fitResult$logLik,
-    BIC = fitResult$logLik$l + log(ncol(MM1))*(2.0*p+1.0- sum(abs(c(alphaOut, betaOut, gammaOut)) > 0.0)),
+    loglik = fitResult$logLik,
+    BIC = -2.0 * fitResult$logLik$l + log(ncol(MM1))*(2.0*p+1.0- sum(abs(c(alphaOut, betaOut, gammaOut)) > 0.0)),
     fitted = matrix(rep(0.0, nrow(M1)), ncol=1L)
   )
 
