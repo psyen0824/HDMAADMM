@@ -1,4 +1,4 @@
-#include <RcppEigen.h>
+#include <oneMKL.h>
 #include <tuple>
 #include "utility.h"
 #include "getLogLikehood.h"

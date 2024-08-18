@@ -1,4 +1,4 @@
-#include <RcppEigen.h>
+#include <oneMKL.h>
 #include "utility.h"
 
 // [[Rcpp::plugins(openmp)]]

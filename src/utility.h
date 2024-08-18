@@ -1,4 +1,4 @@
-#include <RcppEigen.h>
+#include <oneMKL.h>
 #include <iostream>
 
 #ifndef HDMAADMM__UTILITY__h
