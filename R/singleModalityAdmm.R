@@ -246,6 +246,10 @@ singleModalityAdmm <- function(
     stop("tol should be finite non-nan numeric")
   }
 
+  if (!(penalty %in% c("ElasticNet", "Network", "PathwayLasso", "PathwayNetwork"))) {
+    stop("No such penalty type.")
+  }
+
   defaultVerboseOptions <- list(numIter = 10L, numAlpha = 1L, numBeta = 1L, numGamma = 1L)
   for (nm in names(defaultVerboseOptions)) {
     if (nm %in% names(verboseOptions)) {
@@ -261,11 +265,7 @@ singleModalityAdmm <- function(
     }
   }
 
-  if (penalty == "ElasticNet") {
-    if (length(penaltyParameterList) >= 1) {
-      warning("ElasticNet penalty does not take any parameters.")
-    }
-  } else if (penalty == "Network") {
+  if (penalty == "Network") {
     checkPenaltyParameterList(penaltyParameterList, c("laplacianMatrixA", "laplacianMatrixB"), penalty)
   } else if (penalty == "PathwayLasso") {
     checkPenaltyParameterList(penaltyParameterList, c("kappa"), penalty)
@@ -280,8 +280,6 @@ singleModalityAdmm <- function(
     if ((penaltyParameterList$lambda2aStar < 1) || (penaltyParameterList$lambda2bStar < 1)) {
       stop("The tuning parameters lambda2aStar and lambda2bStar must be at least 1 to ensure that the penalty remains convex for optimization purpose.")
     }
-  } else {
-    stop("No such penalty.")
   }
 
   sisIndex <- 1:ncol(M1)
@@ -345,7 +343,6 @@ singleModalityAdmm <- function(
   betaOut <- matrix(rep(0, pTrue), ncol=1)
   betaOut[sisIndex, ] <- fitResult$beta * Y.scale / M1.scale
   gammaOut <- fitResult$gamma * Y.scale/X.scale
-  temp <- c(alphaOut, betaOut, gammaOut)
 
   out <- list(
     alpha = alphaOut,
@@ -359,8 +356,8 @@ singleModalityAdmm <- function(
         fMatProd(fMatProd(matrix(X.center, nrow=1), alphaOut), betaOut)
     ),
     logLik = fitResult$logLik,
-    BIC = fitResult$logLik + log(length(Y))*(length(temp) - sum(abs(temp) > 0)),
-    fitted = matrix(rep(0, nrow(M1)), ncol=1)
+    BIC = fitResult$logLik$l + log(ncol(MM1))*(2.0*p+1.0- sum(abs(c(alphaOut, betaOut, gammaOut)) > 0.0)),
+    fitted = matrix(rep(0.0, nrow(M1)), ncol=1L)
   )
 
   M1Hat <- sweep(fMatProd(X, out$alpha), 2, out$interceptAlpha, `+`)
