@@ -192,9 +192,6 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> upadteAlphaBetaPathwayNetwork(
 
   Eigen::MatrixXd alphaNew = alpha, betaNew = beta;
 
-#if defined(_OPENMP)
-#pragma omp for
-#endif
   for (j = 0; j < p; ++j) {
     Wa1 = lambda2a*laplacianMatrixA.row(j).dot(alphaStep1.row(0));
     Wb1 = lambda2b*laplacianMatrixB.row(j).dot(betaStep2.col(0));
