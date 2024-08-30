@@ -1,8 +1,8 @@
 Package: HDMAADMM
 Type: Package
 Title: ADMM for High-Dimensional Mediation Models
-Version: 0.0.2
-Date: 2024-06-22
+Version: 0.1.0
+Date: 2024-08-30
 Authors@R: c(person(given = "Pei-Shan",
            family = "Yen", 
            email = "peishan0824@gmail.com",
@@ -32,4 +32,4 @@ Encoding: UTF-8
 URL: https://github.com/psyen0824/HDMAADMM
 BugReports: https://github.com/psyen0824/HDMAADMM/issues
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2

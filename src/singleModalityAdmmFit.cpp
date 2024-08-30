@@ -55,12 +55,8 @@ Eigen::MatrixXd upadteAlphaNetwork(
   int p = alpha.cols(), j;
   double numerator, crossProd;
   Eigen::MatrixXd alphaNew = alpha;
-
-#if defined(_OPENMP)
-#pragma omp for
-#endif
   for (j = 0; j < p; j++) {
-    crossProd = alphaStep1(0, j) * laplacianMatrixA(j, j) - alphaStep1.row(0).dot(laplacianMatrixA.col(j));
+    crossProd = alphaNew(0, j) * laplacianMatrixA(j, j) - alphaNew.row(0).dot(laplacianMatrixA.col(j));
     numerator = softThreshold(lambda2a * crossProd + tauAlpha(0, j) + rho * alphaStep1(0, j), lambda1a);
     alphaNew(0, j) = numerator / (lambda2a * laplacianMatrixA(j, j) + rho);
   }
@@ -79,12 +75,8 @@ Eigen::MatrixXd upadteBetaNetwork(
   int p = beta.rows(), j;
   double numerator, crossProd;
   Eigen::MatrixXd betaNew = beta;
-
-#if defined(_OPENMP)
-#pragma omp for
-#endif
   for (j = 0; j < p; ++j) {
-    crossProd = betaStep2(j, 0) * laplacianMatrixB(j, j) - betaStep2.col(0).dot(laplacianMatrixB.col(j));
+    crossProd = betaNew(j, 0) * laplacianMatrixB(j, j) - betaNew.col(0).dot(laplacianMatrixB.col(j));
     numerator = softThreshold(lambda2b * crossProd + tauBeta(j, 0) + rho * betaStep2(j, 0), lambda1b);
     betaNew(j, 0) =  numerator / (lambda2b * laplacianMatrixB(j, j) + rho);
   }
@@ -172,6 +164,8 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> upadteAlphaBetaPathwayLasso(
 };
 
 std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> upadteAlphaBetaPathwayNetwork(
+    Eigen::MatrixXd alpha,
+    Eigen::MatrixXd beta,
     Eigen::MatrixXd laplacianMatrixA,
     Eigen::MatrixXd laplacianMatrixB,
     Eigen::MatrixXd alphaStep1,
@@ -196,7 +190,7 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> upadteAlphaBetaPathwayNetwork(
   double muAlpha, muBeta, denominator, numeratorAlpha, numeratorBeta;
   double Wa1, Wb1;
 
-  Eigen::MatrixXd alphaNew(1, p), betaNew(p, 1);
+  Eigen::MatrixXd alphaNew = alpha, betaNew = beta;
 
 #if defined(_OPENMP)
 #pragma omp for
@@ -338,7 +332,7 @@ Rcpp::List singleModalityAdmmFit(
     X, Y, M1, alphaInit, betaInit, gammaInit,
     penaltyType, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
     kappa, laplacianMatrixA, laplacianMatrixB, lambda2aStar, lambda2bStar
-  ), objNew = 9999.0;
+  );
   if (verbose) {
     Rcpp::Rcout << std::fixed << std::setprecision(5);
     Rcpp::Rcout << "Iteration 0: is converged: no; Objective: " << obj;
@@ -372,7 +366,7 @@ Rcpp::List singleModalityAdmmFit(
       );
     }  else if (penaltyType == 4) {
       std::tie(alphaNew, betaNew) = upadteAlphaBetaPathwayNetwork(
-        laplacianMatrixA, laplacianMatrixB, alphaStep1New, betaStep2New, tauAlpha, tauBeta,
+        alpha, beta, laplacianMatrixA, laplacianMatrixB, alphaStep1New, betaStep2New, tauAlpha, tauBeta,
         rho, lambda1a, lambda1b, lambda2a, lambda2b, kappa, lambda2aStar, lambda2bStar
       );
     }
@@ -381,33 +375,28 @@ Rcpp::List singleModalityAdmmFit(
     tauAlphaNew = tauAlpha + rho * (alphaStep1New - alphaNew);
     tauBetaNew = tauBeta + rho * (betaStep2New - betaNew);
 
-    // get new objective value
-    /*
-    objNew = getObjective(
-      X, Y, M1, alphaNew, betaNew, gammaNew,
-      penaltyType, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
-      kappa, laplacianMatrixA, laplacianMatrixB, lambda2aStar, lambda2bStar
-    );
-    */
-
     // check convergence
     gammaConv = ((gammaNew - gamma).array().pow(2).sum() < tol);
     alphaConv = ((alphaStep1New - alphaNew).array().pow(2).sum() < tol) &&
       ((alphaStep1New - alphaStep1).array().pow(2).sum() < tol);
     betaConv = ((betaStep2New - betaNew).array().pow(2).sum() < tol) &&
       ((betaStep2New - betaStep2).array().pow(2).sum() < tol);
-    converged = (gammaConv && alphaConv && betaConv); // || ((std::abs((objNew - obj) / objNew) < tol * 1e-2) && (iter >= 3));
+    converged = (gammaConv && alphaConv && betaConv);
 
     // print coefs and objective if verbose is true
     if (verbose) {
       if (verbose && ((iter % verboseNumIter == 0) || converged)) {
-        std::string isConvergedString = converged?"yes":"no";
-        objNew = getObjective(
-          X, Y, M1, alphaInit, betaInit, gammaInit,
+        // calculate objective value
+        obj = getObjective(
+          X, Y, M1, alphaNew, betaNew, gammaNew,
           penaltyType, lambda1a, lambda1b, lambda1g, lambda2a, lambda2b,
           kappa, laplacianMatrixA, laplacianMatrixB, lambda2aStar, lambda2bStar
         );
-        Rcpp::Rcout << "Iteration " << iter << ": is converged: " << isConvergedString << "; Objective: " << objNew;
+        // convert flag to string
+        std::string isConvergedString = converged?"yes":"no";
+
+        // print debugging information
+        Rcpp::Rcout << "Iteration " << iter << ": is converged: " << isConvergedString << "; Objective: " << obj;
         Rcpp::Rcout << "; gammaConv: " << gammaConv << ", alphaConv: " << alphaConv << ", betaConv: " << betaConv;
         if (verboseNumGamma > 0) {
           printCoefficient(gammaNew.data(), "gamma", std::min(verboseNumGamma, numColsX));
@@ -430,7 +419,6 @@ Rcpp::List singleModalityAdmmFit(
     gamma = gammaNew;
     tauAlpha = tauAlphaNew;
     tauBeta = tauBetaNew;
-    obj = objNew;
   }
 
   // calculate log likelihood
