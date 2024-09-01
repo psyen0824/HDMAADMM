@@ -6,7 +6,100 @@
 
 // [[Rcpp::plugins(openmp)]]
 
-Eigen::MatrixXd upadteAlphaElasticNet(
+
+
+class ElasticNetObjectiveGrad: public Numer::MFuncGrad {
+private:
+  const Eigen::MatrixXd alphaStep1;
+  const Eigen::MatrixXd betaStep2;
+  const Eigen::MatrixXd tauAlpha;
+  const Eigen::MatrixXd tauBeta;
+  const int p;
+  const double rho;
+  const double lambda1a;
+  const double lambda1b;
+  const double lambda2a;
+  const double lambda2b;
+public:
+  ElasticNetObjectiveGrad(
+    const Eigen::MatrixXd alphaStep1_, const Eigen::MatrixXd betaStep2_,
+    const Eigen::MatrixXd tauAlpha_, const Eigen::MatrixXd tauBeta_,
+    const double rho_, const double lambda1a_, const double lambda1b_,
+    const double lambda2a_, const double lambda2b_
+  ): alphaStep1(alphaStep1_), betaStep2(betaStep2_), tauAlpha(tauAlpha_), tauBeta(tauBeta_), p(alphaStep1.cols()),
+  rho(rho_), lambda1a(lambda1a_), lambda1b(lambda1b_), lambda2a(lambda2a_), lambda2b(lambda2b_)
+  {}
+
+  double f_grad(Numer::Constvec& x, Numer::Refvec grad) {
+    Eigen::VectorXd alpha(p), beta(p);
+    for (int i = 0; i < p; ++i) {
+      alpha(i) = x(i);
+      beta(i) = x(i + p);
+    }
+
+    Eigen::VectorXd alphaDiff = alphaStep1.row(0).transpose() - alpha;
+    Eigen::VectorXd betaDiff = betaStep2.col(0) - beta;
+
+    double P2 = lambda1a * alpha.array().abs().sum() + lambda1b * beta.array().abs().sum();
+    double P3 = lambda2a * alpha.dot(alpha) + lambda2b * beta.dot(beta);
+    double dual = tauAlpha.row(0).dot(alphaDiff) + tauBeta.col(0).dot(betaDiff);
+    const double f = P2 + P3 + dual + 0.5 * rho * (alphaDiff.dot(alphaDiff) + betaDiff.dot(betaDiff)); // rho/2 * ||x - z||^2
+
+    Eigen::VectorXd gradP2_alpha = lambda1a * alpha.array().sign();
+    Eigen::VectorXd gradP2_beta = lambda1b * beta.array().sign();
+    Eigen::VectorXd gradP3_alpha = 2.0 * lambda2a * alpha.array();
+    Eigen::VectorXd gradP3_beta = 2.0 * lambda2b * beta.array();
+
+    Eigen::VectorXd gradAlpha = gradP2_alpha + gradP3_alpha - tauAlpha.row(0).transpose() - rho * alphaDiff;
+    Eigen::VectorXd gradBeta = gradP2_beta + gradP3_beta - tauBeta.col(0) - rho * betaDiff;
+    for (int i = 0; i < p; ++i) {
+      grad(i) = gradAlpha(i);
+      grad(i + p) = gradBeta(i);
+    }
+    return f;
+  }
+};
+
+
+std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> updateAlphaBetaElasticNet(
+    Eigen::MatrixXd alpha,
+    Eigen::MatrixXd beta,
+    Eigen::MatrixXd alphaStep1,
+    Eigen::MatrixXd betaStep2,
+    Eigen::MatrixXd tauAlpha,
+    Eigen::MatrixXd tauBeta,
+    double rho,
+    double lambda1a,
+    double lambda1b,
+    double lambda2a,
+    double lambda2b
+) {
+  int p = alpha.cols();
+
+  Eigen::VectorXd x(p + p);
+  for (int i = 0; i < p; ++i) {
+    x(i) = alpha(0, i);
+    x(i + p) = beta(i, 0);
+  }
+
+  ElasticNetObjectiveGrad enog(alphaStep1, betaStep2, tauAlpha, tauBeta, rho, lambda1a, lambda1b, lambda2a, lambda2b);
+
+  double fopt;
+  int status = Numer::optim_lbfgs(enog, x, fopt, 5000, 1e-8, 1e-5);
+  if (status < 0) {
+    Rcpp::warning("algorithm did not converge");
+  }
+
+  Eigen::MatrixXd alphaNew(1, p), betaNew(p, 1);
+  for (int i = 0; i < p; ++i) {
+    alphaNew(0, i) = x(i);
+    betaNew(i, 0) = x(i + p);
+  }
+  return std::make_tuple(alphaNew, betaNew);
+
+}
+
+Eigen::MatrixXd updateAlphaElasticNet(
     Eigen::MatrixXd alphaStep1,
     Eigen::MatrixXd tauAlpha,
     double rho,
@@ -25,7 +118,7 @@ Eigen::MatrixXd upadteAlphaElasticNet(
   return alphaNew;
 };
 
-Eigen::MatrixXd upadteBetaElasticNet(
+Eigen::MatrixXd updateBetaElasticNet(
     Eigen::MatrixXd betaStep2,
     Eigen::MatrixXd tauBeta,
     double rho,
@@ -44,7 +137,7 @@ Eigen::MatrixXd upadteBetaElasticNet(
   return betaNew;
 };
 
-Eigen::MatrixXd upadteAlphaNetwork(
+Eigen::MatrixXd updateAlphaNetwork(
     Eigen::MatrixXd laplacianMatrixA,
     Eigen::MatrixXd alpha,
     Eigen::MatrixXd alphaStep1,
@@ -64,7 +157,7 @@ Eigen::MatrixXd upadteAlphaNetwork(
   return alphaNew;
 };
 
-Eigen::MatrixXd upadteBetaNetwork(
+Eigen::MatrixXd updateBetaNetwork(
     Eigen::MatrixXd laplacianMatrixB,
     Eigen::MatrixXd beta,
     Eigen::MatrixXd betaStep2,
@@ -84,7 +177,7 @@ Eigen::MatrixXd upadteBetaNetwork(
   return betaNew;
 };
 
-std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> upadteAlphaBetaPathwayLasso(
+std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> updateAlphaBetaPathwayLasso(
     Eigen::MatrixXd alphaStep1,
     Eigen::MatrixXd betaStep2,
     Eigen::MatrixXd tauAlpha,
@@ -232,7 +325,7 @@ public:
   }
 };
 
-std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> upadteAlphaBetaPathwayNetwork(
+std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> updateAlphaBetaPathwayNetwork(
     Eigen::MatrixXd alpha,
     Eigen::MatrixXd beta,
     Eigen::MatrixXd laplacianMatrixA,
@@ -265,7 +358,6 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> upadteAlphaBetaPathwayNetwork(
 
   double fopt;
   int status = Numer::optim_lbfgs(pnog, x, fopt, 5000, 1e-8, 1e-5);
-  Rcpp::Rcout << "status: " << status << std::endl;
   if (status < 0) {
     Rcpp::warning("algorithm did not converge");
   }
@@ -377,18 +469,21 @@ Rcpp::List singleModalityAdmmFit(
 
     // ADMM step 2: penalty term part
     if (penaltyType == 1) {
-      alphaNew = upadteAlphaElasticNet(alphaStep1New, tauAlpha, rho, lambda1a, lambda2a);
-      betaNew = upadteBetaElasticNet(betaStep2New, tauBeta, rho, lambda1b, lambda2b);
+      // alphaNew = updateAlphaElasticNet(alphaStep1New, tauAlpha, rho, lambda1a, lambda2a);
+      // betaNew = updateBetaElasticNet(betaStep2New, tauBeta, rho, lambda1b, lambda2b);
+      std::tie(alphaNew, betaNew) = updateAlphaBetaElasticNet(
+        alpha, beta, alphaStep1New, betaStep2New, tauAlpha, tauBeta, rho, lambda1a, lambda1b, lambda2a, lambda2b
+      );
     } else if (penaltyType == 2) {
-      alphaNew = upadteAlphaNetwork(laplacianMatrixA, alpha, alphaStep1New, tauAlpha, rho, lambda1a, lambda2a);
-      betaNew = upadteBetaNetwork(laplacianMatrixB, beta, betaStep2New, tauBeta, rho, lambda1b, lambda2b);
+      alphaNew = updateAlphaNetwork(laplacianMatrixA, alpha, alphaStep1New, tauAlpha, rho, lambda1a, lambda2a);
+      betaNew = updateBetaNetwork(laplacianMatrixB, beta, betaStep2New, tauBeta, rho, lambda1b, lambda2b);
     } else if (penaltyType == 3) {
-      std::tie(alphaNew, betaNew) = upadteAlphaBetaPathwayLasso(
+      std::tie(alphaNew, betaNew) = updateAlphaBetaPathwayLasso(
         alphaStep1New, betaStep2New, tauAlpha, tauBeta,
         rho, lambda1a, lambda1b, lambda2a, lambda2b, kappa
       );
     }  else if (penaltyType == 4) {
-      std::tie(alphaNew, betaNew) = upadteAlphaBetaPathwayNetwork(
+      std::tie(alphaNew, betaNew) = updateAlphaBetaPathwayNetwork(
         alpha, beta, laplacianMatrixA, laplacianMatrixB, alphaStep1New, betaStep2New, tauAlpha, tauBeta,
         rho, lambda1a, lambda1b, lambda2a, lambda2b, kappa, lambda2aStar, lambda2bStar
       );
