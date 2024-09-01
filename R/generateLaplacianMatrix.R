@@ -32,10 +32,9 @@ nagelkerkeRSequared <- function(obj) {
 #'
 #' @param X,Y,M1 The input data for the single modality mediation model. Details see \code{\link{singleModalityAdmm}}.
 #' @param type A string to specify the generated Laplacian matrix is for \eqn{\alpha} or \eqn{\beta}.
-#' @param interaction A logical value to specify whether to refer interation effect.
 #' @export
 #' @importFrom stats lm glm
-generateLaplacianMatrix <- function(X, Y, M1, type = "beta", interaction = FALSE) {
+generateLaplacianMatrix <- function(X, Y, M1, type = "beta") {
   p <- ncol(M1)
   W <- matrix(0, p, p)
   if (type == "beta") {
