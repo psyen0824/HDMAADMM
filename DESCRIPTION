@@ -24,7 +24,8 @@ Imports:
   RcppEigen
 LinkingTo:
   Rcpp,
-  RcppEigen
+  RcppEigen,
+  RcppNumerical
 Suggests:
   testthat,
   roxygen2

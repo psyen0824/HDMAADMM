@@ -1,3 +1,4 @@
+#include <RcppNumerical.h>
 #include <RcppEigen.h>
 #include <tuple>
 #include "utility.h"
@@ -163,6 +164,74 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> upadteAlphaBetaPathwayLasso(
   return std::make_tuple(alphaNew, betaNew);
 };
 
+class PathwayNetworkObjectiveGrad: public Numer::MFuncGrad {
+private:
+  const Eigen::MatrixXd alphaStep1;
+  const Eigen::MatrixXd betaStep2;
+  const Eigen::MatrixXd tauAlpha;
+  const Eigen::MatrixXd tauBeta;
+  const Eigen::MatrixXd laplacianMatrixA;
+  const Eigen::MatrixXd laplacianMatrixB;
+  const int p;
+  const double kappa;
+  const double rho;
+  const double lambda1a;
+  const double lambda1b;
+  const double lambda2a;
+  const double lambda2b;
+  const double lambda2aStar;
+  const double lambda2bStar;
+public:
+  PathwayNetworkObjectiveGrad(
+    const Eigen::MatrixXd alphaStep1_, const Eigen::MatrixXd betaStep2_,
+    const Eigen::MatrixXd tauAlpha_, const Eigen::MatrixXd tauBeta_,
+    const Eigen::MatrixXd laplacianMatrixA_, const Eigen::MatrixXd laplacianMatrixB_,
+    const double kappa_, const double rho_, const double lambda1a_, const double lambda1b_,
+    const double lambda2a_, const double lambda2b_, const double lambda2aStar_, const double lambda2bStar_
+  ): alphaStep1(alphaStep1_), betaStep2(betaStep2_), tauAlpha(tauAlpha_), tauBeta(tauBeta_),
+     laplacianMatrixA(laplacianMatrixA_), laplacianMatrixB(laplacianMatrixB_), p(alphaStep1.cols()),
+     kappa(kappa_), rho(rho_), lambda1a(lambda1a_), lambda1b(lambda1b_), lambda2a(lambda2a_), lambda2b(lambda2b_),
+     lambda2aStar(lambda2aStar_), lambda2bStar(lambda2bStar_)
+  {}
+
+  double f_grad(Numer::Constvec& x, Numer::Refvec grad) {
+    Eigen::VectorXd alpha(p), beta(p);
+    for (int i = 0; i < p; ++i) {
+      alpha(i) = x(i);
+      beta(i) = x(i + p);
+    }
+
+    Eigen::VectorXd alphaDiff = alphaStep1.row(0).transpose() - alpha;
+    Eigen::VectorXd betaDiff = betaStep2.col(0) - beta;
+
+    double P2 = lambda1a * alpha.array().abs().sum() + lambda1b * beta.array().abs().sum();
+    double P3 = kappa * (
+      (alpha.array() * beta.array()).abs().sum() +
+        lambda2a * alpha.dot(laplacianMatrixA * alpha) +
+        lambda2aStar * lambda2a * alpha.dot(alpha) +
+        lambda2b * beta.dot(laplacianMatrixB * beta) +
+        lambda2bStar * lambda2b * beta.dot(beta)
+    );
+    double dual = tauAlpha.row(0).dot(alphaDiff) + tauBeta.col(0).dot(betaDiff);
+    const double f = P2 + P3 + dual + 0.5 * rho * (alphaDiff.dot(alphaDiff) + betaDiff.dot(betaDiff)); // rho/2 * ||x - z||^2
+
+    Eigen::VectorXd gradP2_alpha = lambda1a * alpha.array().sign();
+    Eigen::VectorXd gradP2_beta = lambda1b * beta.array().sign();
+    Eigen::VectorXd gradP3_alpha = kappa * (beta.array().abs() * alpha.array().sign() +
+      2.0 * lambda2a * (laplacianMatrixA * alpha).array() + 2.0 * lambda2a * lambda2aStar * alpha.array());
+    Eigen::VectorXd gradP3_beta = kappa * (alpha.array().abs() * beta.array().sign() +
+      2.0 * lambda2b * (laplacianMatrixB * beta).array() + 2.0 * lambda2b * lambda2bStar * beta.array());
+
+    Eigen::VectorXd gradAlpha = gradP2_alpha + gradP3_alpha - tauAlpha.row(0).transpose() - rho * alphaDiff;
+    Eigen::VectorXd gradBeta = gradP2_beta + gradP3_beta - tauBeta.col(0) - rho * betaDiff;
+    for (int i = 0; i < p; ++i) {
+      grad(i) = gradAlpha(i);
+      grad(i + p) = gradBeta(i);
+    }
+    return f;
+  }
+};
+
 std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> upadteAlphaBetaPathwayNetwork(
     Eigen::MatrixXd alpha,
     Eigen::MatrixXd beta,
@@ -181,76 +250,30 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> upadteAlphaBetaPathwayNetwork(
     double lambda2aStar,
     double lambda2bStar
 ) {
-  int p = alphaStep1.cols(), j;
-  double Wa2 = lambda2a*lambda2aStar;
-  double Wb2 = lambda2b*lambda2bStar;
+  int p = alpha.cols();
 
-  double phi1 = 2*kappa*Wa2+rho, phi2 = 2*kappa*Wb2+rho;
+  Eigen::VectorXd x(p + p);
+  for (int i = 0; i < p; ++i) {
+    x(i) = alpha(0, i);
+    x(i + p) = beta(i, 0);
+  }
 
-  double muAlpha, muBeta, denominator, numeratorAlpha, numeratorBeta;
-  double Wa1, Wb1;
+  PathwayNetworkObjectiveGrad pnog(
+    alphaStep1, betaStep2, tauAlpha, tauBeta, laplacianMatrixA, laplacianMatrixB,
+    kappa, rho, lambda1a, lambda1b, lambda2a, lambda2b, lambda2aStar, lambda2bStar
+  );
 
-  Eigen::MatrixXd alphaNew = alpha, betaNew = beta;
+  double fopt;
+  int status = Numer::optim_lbfgs(pnog, x, fopt, 5000, 1e-8, 1e-5);
+  Rcpp::Rcout << "status: " << status << std::endl;
+  if (status < 0) {
+    Rcpp::warning("algorithm did not converge");
+  }
 
-#if defined(_OPENMP)
-#pragma omp for
-#endif
-  for (j = 0; j < p; ++j) {
-    Wa1 = lambda2a*laplacianMatrixA.row(j).dot(alphaStep1.row(0));
-    Wb1 = lambda2b*laplacianMatrixB.row(j).dot(betaStep2.col(0));
-
-    muAlpha = -kappa*Wa1 + tauAlpha(0, j) + rho*alphaStep1(0, j);
-    muBeta = -kappa*Wb1 + tauBeta(j, 0) + rho*betaStep2(j, 0);
-
-    if (kappa == 0.0) {
-      alphaNew(0, j) = softThreshold(muAlpha, lambda1a) / phi1;
-      betaNew(j, 0) = softThreshold(muBeta, lambda1b) / phi2;
-    } else {
-      denominator = phi1*phi2-kappa*kappa;
-
-      numeratorAlpha = phi2*(muAlpha-lambda1a)-kappa*(muBeta-lambda1b);
-      numeratorBeta = phi1*(muBeta-lambda1b)-kappa*(muAlpha-lambda1a);
-      if ((numeratorAlpha > 0) && (numeratorBeta > 0)) {
-        alphaNew(0, j) = numeratorAlpha / denominator;
-        betaNew(j, 0) = numeratorBeta / denominator;
-      } else {
-        numeratorAlpha = phi2*(muAlpha-lambda1a)+kappa*(muBeta+lambda1b);
-        numeratorBeta = phi1*(muBeta+lambda1b)+kappa*(muAlpha-lambda1a);
-        if ((numeratorAlpha > 0) && (numeratorBeta < 0)) {
-          alphaNew(0, j) = numeratorAlpha / denominator;
-          betaNew(j, 0) = numeratorBeta / denominator;
-        } else {
-          numeratorAlpha = phi2*(muAlpha+lambda1a)+kappa*(muBeta-lambda1b);
-          numeratorBeta = phi1*(muBeta-lambda1b)+kappa*(muAlpha+lambda1a);
-          if ((numeratorAlpha < 0) && (numeratorBeta > 0)) {
-            alphaNew(0, j) = numeratorAlpha / denominator;
-            betaNew(j, 0) = numeratorBeta / denominator;
-          } else {
-            numeratorAlpha = phi2*(muAlpha+lambda1a)-kappa*(muBeta+lambda1b);
-            numeratorBeta = phi1*(muBeta+lambda1b)-kappa*(muAlpha+lambda1a);
-            if ((numeratorAlpha < 0) && (numeratorBeta < 0)) {
-              alphaNew(0, j) = numeratorAlpha / denominator;
-              betaNew(j, 0) = numeratorBeta / denominator;
-            } else {
-              numeratorAlpha = abs(muAlpha) - lambda1a;
-              if ((numeratorAlpha > 0) && (phi1*abs(muBeta)-kappa*abs(muAlpha) <= phi1*lambda1b-kappa*lambda1a)) {
-                alphaNew(0, j) = sgn(muAlpha) * numeratorAlpha / phi1;
-                betaNew(j, 0) = 0.0;
-              } else {
-                numeratorBeta = abs(muBeta) - lambda1b;
-                if ((numeratorBeta > 0) && (phi2*abs(muAlpha)-kappa*abs(muBeta) <= phi2*lambda1a-kappa*lambda1b)) {
-                  alphaNew(0, j) = 0.0;
-                  betaNew(j, 0) = sgn(muBeta) * numeratorBeta / phi2;
-                } else {
-                  alphaNew(0, j) = 0.0;
-                  betaNew(j, 0) = 0.0;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+  Eigen::MatrixXd alphaNew(1, p), betaNew(p, 1);
+  for (int i = 0; i < p; ++i) {
+    alphaNew(0, i) = x(i);
+    betaNew(i, 0) = x(i + p);
   }
   return std::make_tuple(alphaNew, betaNew);
 };
