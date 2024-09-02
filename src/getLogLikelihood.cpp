@@ -46,34 +46,26 @@ double getObjective(
   double p1 = lambda1g * gamma.array().abs().sum();
   double p2 = lambda1a * alpha.array().abs().sum() + lambda1b * beta.array().abs().sum();
   double p3 = 0.0;
-  Eigen::MatrixXd alphaTemp, betaTemp;
   if (penaltyType == 1) {
     // Elastic Net
-    alphaTemp = alpha * alpha.transpose();
-    betaTemp = beta.transpose() * beta;
-    p3 = lambda2a * alphaTemp(0, 0) + lambda2b * betaTemp(0, 0);
+    p3 = lambda2a * alpha.row(0).dot(alpha.row(0)) + lambda2b * beta.col(0).dot(beta.col(0));
   } else if (penaltyType == 2) {
     // Network
-    alphaTemp = alpha * laplacianMatrixA * alpha.transpose();
-    betaTemp = beta.transpose() * laplacianMatrixB * beta;
+    Eigen::MatrixXd alphaTemp = alpha * laplacianMatrixA * alpha.transpose();
+    Eigen::MatrixXd betaTemp = beta.transpose() * laplacianMatrixB * beta;
     p3 = lambda2a * alphaTemp(0, 0) + lambda2b * betaTemp(0, 0);
   } else if (penaltyType == 3) {
     // Pathway Lasso
-    alphaTemp = alpha * alpha.transpose();
-    betaTemp = beta.transpose() * beta;
-    p3 = (alpha.col(0).transpose().array() * beta.row(0).array()).abs().sum() +
-      lambda2a * alphaTemp(0, 0) + lambda2b* betaTemp(0, 0);
+    p3 = (alpha.row(0).transpose().array() * beta.col(0).array()).abs().sum() +
+      lambda2a * alpha.row(0).dot(alpha.row(0)) + lambda2b * beta.col(0).dot(beta.col(0));
     p3 *= kappa;
   }  else if (penaltyType == 4) {
     // Pathway Network
-    Eigen::MatrixXd sigmaA = laplacianMatrixA;
-    sigmaA.diagonal().array() += lambda2aStar;
-    Eigen::MatrixXd sigmaB = laplacianMatrixB;
-    sigmaA.diagonal().array() += lambda2bStar;
-    alphaTemp = alpha * sigmaA * alpha.transpose();
-    betaTemp = beta.transpose() * sigmaB * beta;
-    p3 = (alpha.col(0).transpose().array() * beta.row(0).array()).abs().sum() +
-      lambda2a * alphaTemp(0, 0) + lambda2b* betaTemp(0, 0);
+    Eigen::MatrixXd alphaTemp = alpha * laplacianMatrixA * alpha.transpose();
+    Eigen::MatrixXd betaTemp = beta.transpose() * laplacianMatrixB * beta;
+    p3 = (alpha.row(0).transpose().array() * beta.col(0).array()).abs().sum() +
+      lambda2a * alphaTemp(0, 0) + lambda2a * lambda2aStar * alpha.row(0).dot(alpha.row(0)) +
+      lambda2b * betaTemp(0, 0) + lambda2b * lambda2bStar * beta.col(0).dot(beta.col(0));
     p3 *= kappa;
   }
   return logLik + p1 + p2 + p3;
