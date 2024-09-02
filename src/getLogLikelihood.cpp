@@ -48,7 +48,7 @@ double getObjective(
   double p3 = 0.0;
   if (penaltyType == 1) {
     // Elastic Net
-    p3 = lambda2a * alpha.row(0).dot(alpha.row(0)) + lambda2b * beta.row(0).dot(beta.row(0));
+    p3 = lambda2a * alpha.row(0).dot(alpha.row(0)) + lambda2b * beta.col(0).dot(beta.col(0));
   } else if (penaltyType == 2) {
     // Network
     Eigen::MatrixXd alphaTemp = alpha * laplacianMatrixA * alpha.transpose();
@@ -57,7 +57,7 @@ double getObjective(
   } else if (penaltyType == 3) {
     // Pathway Lasso
     p3 = (alpha.row(0).transpose().array() * beta.col(0).array()).abs().sum() +
-      lambda2a * alpha.row(0).dot(alpha.row(0)) + lambda2b * beta.row(0).dot(beta.row(0));
+      lambda2a * alpha.row(0).dot(alpha.row(0)) + lambda2b * beta.col(0).dot(beta.col(0));
     p3 *= kappa;
   }  else if (penaltyType == 4) {
     // Pathway Network
@@ -65,8 +65,8 @@ double getObjective(
     Eigen::MatrixXd betaTemp = beta.transpose() * laplacianMatrixB * beta;
     p3 = (alpha.row(0).transpose().array() * beta.col(0).array()).abs().sum() +
       lambda2a * alphaTemp(0, 0) + lambda2a * lambda2aStar * alpha.row(0).dot(alpha.row(0)) +
-      lambda2b * betaTemp(0, 0) + lambda2b * lambda2bStar * beta.row(0).dot(beta.row(0));
+      lambda2b * betaTemp(0, 0) + lambda2b * lambda2bStar * beta.col(0).dot(beta.col(0));
     p3 *= kappa;
   }
-  return -logLik + p1 + p2 + p3;
+  return logLik + p1 + p2 + p3;
 }

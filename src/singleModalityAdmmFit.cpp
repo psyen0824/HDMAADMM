@@ -41,23 +41,15 @@ public:
     Eigen::VectorXd betaDiff = betaStep2.col(0) - beta_pos + beta_neg;
 
     double P2 = lambda1a * (alpha_pos.array().sum() + alpha_neg.array().sum()) + lambda1b * (beta_pos.array().sum() + beta_neg.array().sum());
-    double P3 = lambda2a * (alpha_pos.dot(alpha_pos) + alpha_neg.dot(alpha_neg)) + lambda2b * (beta_pos.dot(beta_pos) + beta_neg.dot(beta_neg));
+    double P3 = lambda2a * ((alpha_pos - alpha_neg).dot(alpha_pos - alpha_neg) + (beta_pos - beta_neg).dot(beta_pos - beta_neg));
     double dual = tauAlpha.row(0).dot(alphaDiff) + tauBeta.col(0).dot(betaDiff);
     double f = P2 + P3 + dual + 0.5 * rho * (alphaDiff.dot(alphaDiff) + betaDiff.dot(betaDiff)); // rho/2 * ||x - z||^2
 
-    Eigen::VectorXd gradP3_alpha(2 * p), gradP3_beta(2 * p);
     for (int i = 0; i < p; ++i) {
-      gradP3_alpha(i) = 2.0 * lambda2a * alpha_pos(i);
-      gradP3_alpha(i + p) = -2.0 * lambda2a * alpha_neg(i);
-      gradP3_beta(i) = 2.0 * lambda2b * beta_pos(i);
-      gradP3_beta(i + p) = -2.0 * lambda2b * beta_neg(i);
-    }
-
-    for (int i = 0; i < p; ++i) {
-      grad(i) = lambda1a + gradP3_alpha(i) - tauAlpha(0, i) + rho * alphaDiff(i);
-      grad(i + p) = lambda1a - gradP3_alpha(i+p) + tauAlpha(0, i) - rho * alphaDiff(i);
-      grad(i + 2*p) = lambda1b + gradP3_alpha(i) - tauBeta(i, 0) + rho * betaDiff(i);
-      grad(i + 3*p) = lambda1b - gradP3_beta(i+p) + tauBeta(i, 0) - rho * betaDiff(i);
+      grad(i) = lambda1a + 2.0 * lambda2a * (alpha_pos(i) - alpha_neg(i)) - tauAlpha(0, i) + rho * alpha_pos(i);
+      grad(i + p) = lambda1a - 2.0 * lambda2a * (alpha_pos(i) - alpha_neg(i)) + tauAlpha(0, i) - rho * alpha_neg(i);
+      grad(i + 2*p) = lambda1b + 2.0 * lambda2b * (beta_pos(i) - beta_neg(i)) - tauBeta(i, 0) + rho * beta_pos(i);
+      grad(i + 3*p) = lambda1b - 2.0 * lambda2b * (beta_pos(i) - beta_neg(i)) + tauBeta(i, 0) - rho * beta_neg(i);
     }
     return f;
   }
@@ -95,10 +87,10 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> updateAlphaBetaElasticNet(
   }
 
   LBFGSpp::LBFGSBParam<double> param;
-  param.epsilon        = 1e-5;
-  param.epsilon_rel    = 1e-5;
+  param.epsilon        = 1e-6;
+  param.epsilon_rel    = 1e-6;
   param.past           = 1;
-  param.delta          = 1e-6;
+  param.delta          = 1e-8;
   param.max_iterations = 10000;
   param.max_linesearch = 500;
 
@@ -109,7 +101,6 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> updateAlphaBetaElasticNet(
   for (int i = 0; i < 4*p; ++i) {
     ub(i) = std::numeric_limits<double>::infinity();
   }
-
 
   LBFGSpp::LBFGSBSolver<double> solver(param);
   double fopt;
