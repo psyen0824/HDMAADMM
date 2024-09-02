@@ -30,6 +30,10 @@ public:
 
   double operator()(const Eigen::VectorXd& x, Eigen::VectorXd& grad) {
     Eigen::VectorXd alpha_pos(p), alpha_neg(p), beta_pos(p), beta_neg(p);
+
+#if defined(_OPENMP)
+#pragma omp for
+#endif
     for (int i = 0; i < p; ++i) {
       alpha_pos(i) = x(i);
       alpha_neg(i) = x(i + p);
@@ -37,19 +41,23 @@ public:
       beta_neg(i) = x(i + 3*p);
     }
 
-    Eigen::VectorXd alphaDiff = alphaStep1.row(0).transpose() - alpha_pos + alpha_neg;
-    Eigen::VectorXd betaDiff = betaStep2.col(0) - beta_pos + beta_neg;
+    Eigen::VectorXd alpha = alpha_pos - alpha_neg, beta = beta_pos - beta_neg;
+    Eigen::VectorXd alphaDiff = alphaStep1.row(0).transpose() - alpha;
+    Eigen::VectorXd betaDiff = betaStep2.col(0) - beta;
 
     double P2 = lambda1a * (alpha_pos.array().sum() + alpha_neg.array().sum()) + lambda1b * (beta_pos.array().sum() + beta_neg.array().sum());
-    double P3 = lambda2a * ((alpha_pos - alpha_neg).dot(alpha_pos - alpha_neg) + (beta_pos - beta_neg).dot(beta_pos - beta_neg));
+    double P3 = lambda2a * (alpha.dot(alpha)) + lambda2b * (beta.dot(beta));
     double dual = tauAlpha.row(0).dot(alphaDiff) + tauBeta.col(0).dot(betaDiff);
     double f = P2 + P3 + dual + 0.5 * rho * (alphaDiff.dot(alphaDiff) + betaDiff.dot(betaDiff)); // rho/2 * ||x - z||^2
 
+#if defined(_OPENMP)
+#pragma omp for
+#endif
     for (int i = 0; i < p; ++i) {
-      grad(i) = lambda1a + 2.0 * lambda2a * (alpha_pos(i) - alpha_neg(i)) - tauAlpha(0, i) + rho * alpha_pos(i);
-      grad(i + p) = lambda1a - 2.0 * lambda2a * (alpha_pos(i) - alpha_neg(i)) + tauAlpha(0, i) - rho * alpha_neg(i);
-      grad(i + 2*p) = lambda1b + 2.0 * lambda2b * (beta_pos(i) - beta_neg(i)) - tauBeta(i, 0) + rho * beta_pos(i);
-      grad(i + 3*p) = lambda1b - 2.0 * lambda2b * (beta_pos(i) - beta_neg(i)) + tauBeta(i, 0) - rho * beta_neg(i);
+      grad(i) = lambda1a + 2.0 * lambda2a * alpha(i) - tauAlpha(0, i) - rho * alphaDiff(i);
+      grad(i + p) = lambda1a - 2.0 * lambda2a * alpha(i) + tauAlpha(0, i) + rho * alphaDiff(i);
+      grad(i + 2*p) = lambda1b + 2.0 * lambda2b * beta(i) - tauBeta(i, 0) - rho * betaDiff(i);
+      grad(i + 3*p) = lambda1b - 2.0 * lambda2b * beta(i) + tauBeta(i, 0) + rho * betaDiff(i);
     }
     return f;
   }
@@ -72,6 +80,10 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> updateAlphaBetaElasticNet(
   int p = alpha.cols();
 
   Eigen::VectorXd x = Eigen::VectorXd::Zero(4*p);
+
+#if defined(_OPENMP)
+#pragma omp for
+#endif
   for (int i = 0; i < p; ++i) {
     if (alpha(0, i) >= 0) {
       x(i) = alpha(0, i);
@@ -87,17 +99,20 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> updateAlphaBetaElasticNet(
   }
 
   LBFGSpp::LBFGSBParam<double> param;
-  param.epsilon        = 1e-6;
-  param.epsilon_rel    = 1e-6;
+  param.epsilon        = 1e-4;
+  param.epsilon_rel    = 1e-4;
   param.past           = 1;
-  param.delta          = 1e-8;
-  param.max_iterations = 10000;
-  param.max_linesearch = 500;
+  param.delta          = 1e-5;
+  param.max_iterations = 3000;
+  param.max_linesearch = 200;
 
   ElasticNetObjectiveGrad enog(alphaStep1, betaStep2, tauAlpha, tauBeta, rho, lambda1a, lambda1b, lambda2a, lambda2b);
   Eigen::VectorXd lb = Eigen::VectorXd::Zero(4*p);
   Eigen::VectorXd ub = Eigen::VectorXd::Zero(4*p);
 
+#if defined(_OPENMP)
+#pragma omp for
+#endif
   for (int i = 0; i < 4*p; ++i) {
     ub(i) = std::numeric_limits<double>::infinity();
   }
@@ -113,6 +128,10 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> updateAlphaBetaElasticNet(
   }
 
   Eigen::MatrixXd alphaNew(1, p), betaNew(p, 1);
+
+#if defined(_OPENMP)
+#pragma omp for
+#endif
   for (int i = 0; i < p; ++i) {
     alphaNew(0, i) = x(i) - x(i + p);
     betaNew(i, 0) = x(i + 2*p) - x(i + 3*p);
@@ -278,8 +297,8 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> updateAlphaBetaPathwayLasso(
   return std::make_tuple(alphaNew, betaNew);
 };
 
-/*
-class PathwayNetworkObjectiveGrad: public Numer::MFuncGrad {
+
+class PathwayNetworkObjectiveGrad {
 private:
   const Eigen::MatrixXd alphaStep1;
   const Eigen::MatrixXd betaStep2;
@@ -309,39 +328,55 @@ public:
      lambda2aStar(lambda2aStar_), lambda2bStar(lambda2bStar_)
   {}
 
-  double f_grad(Numer::Constvec& x, Numer::Refvec grad) {
-    Eigen::VectorXd alpha(p), beta(p);
+  double operator()(const Eigen::VectorXd& x, Eigen::VectorXd& grad) {
+    Eigen::VectorXd alpha_pos(p), alpha_neg(p), beta_pos(p), beta_neg(p);
+
+#if defined(_OPENMP)
+#pragma omp for
+#endif
     for (int i = 0; i < p; ++i) {
-      alpha(i) = x(i);
-      beta(i) = x(i + p);
+      alpha_pos(i) = x(i);
+      alpha_neg(i) = x(i + p);
+      beta_pos(i) = x(i + 2*p);
+      beta_neg(i) = x(i + 3*p);
     }
 
+    Eigen::VectorXd alpha = alpha_pos - alpha_neg, beta = beta_pos - beta_neg;
     Eigen::VectorXd alphaDiff = alphaStep1.row(0).transpose() - alpha;
     Eigen::VectorXd betaDiff = betaStep2.col(0) - beta;
 
-    double P2 = lambda1a * alpha.array().abs().sum() + lambda1b * beta.array().abs().sum();
+    double P2 = lambda1a * (alpha_pos.array().sum() + alpha_neg.array().sum()) + lambda1b * (beta_pos.array().sum() + beta_neg.array().sum());
     double P3 = kappa * (
       (alpha.array() * beta.array()).abs().sum() +
-        lambda2a * alpha.dot(laplacianMatrixA * alpha) +
-        lambda2aStar * lambda2a * alpha.dot(alpha) +
-        lambda2b * beta.dot(laplacianMatrixB * beta) +
-        lambda2bStar * lambda2b * beta.dot(beta)
+        lambda2a * alpha.dot(laplacianMatrixA * alpha) + lambda2a * lambda2aStar * alpha.dot(alpha) +
+        lambda2b * beta.dot(laplacianMatrixB * beta) + lambda2b * lambda2bStar * beta.dot(beta)
     );
     double dual = tauAlpha.row(0).dot(alphaDiff) + tauBeta.col(0).dot(betaDiff);
     const double f = P2 + P3 + dual + 0.5 * rho * (alphaDiff.dot(alphaDiff) + betaDiff.dot(betaDiff)); // rho/2 * ||x - z||^2
 
-    Eigen::VectorXd gradP2_alpha = lambda1a * alpha.array().sign();
-    Eigen::VectorXd gradP2_beta = lambda1b * beta.array().sign();
-    Eigen::VectorXd gradP3_alpha = kappa * (beta.array().abs() * alpha.array().sign() +
-      2.0 * lambda2a * (laplacianMatrixA * alpha).array() + 2.0 * lambda2a * lambda2aStar * alpha.array());
-    Eigen::VectorXd gradP3_beta = kappa * (alpha.array().abs() * beta.array().sign() +
-      2.0 * lambda2b * (laplacianMatrixB * beta).array() + 2.0 * lambda2b * lambda2bStar * beta.array());
-
-    Eigen::VectorXd gradAlpha = gradP2_alpha + gradP3_alpha - tauAlpha.row(0).transpose() - rho * alphaDiff;
-    Eigen::VectorXd gradBeta = gradP2_beta + gradP3_beta - tauBeta.col(0) - rho * betaDiff;
+#if defined(_OPENMP)
+#pragma omp for
+#endif
     for (int i = 0; i < p; ++i) {
-      grad(i) = gradAlpha(i);
-      grad(i + p) = gradBeta(i);
+      double tmp1 = 2.0 * kappa * lambda2a * (laplacianMatrixA.row(i).dot(alpha) + lambda2aStar * alpha(i));
+      grad(i) = lambda1a + tmp1 - tauAlpha(0, i) - rho * alphaDiff(i);
+      grad(i + p) = lambda1a - tmp1 + tauAlpha(0, i) + rho * alphaDiff(i);
+
+      double tmp2 = 2.0 * kappa * lambda2b * (laplacianMatrixB.row(i).dot(beta) + lambda2bStar * beta(i));
+      grad(i + 2*p) = lambda1b + tmp2 - tauBeta(i, 0) - rho * betaDiff(i);
+      grad(i + 3*p) = lambda1b - tmp2 + tauBeta(i, 0) + rho * betaDiff(i);
+
+      if (((alpha(i) > 0) && (beta(i) > 0)) || ((alpha(i) < 0) && (beta(i) < 0))) {
+        grad(i) += kappa * beta(i);
+        grad(i + p) -= kappa * beta(i);
+        grad(i + 2*p) += kappa * alpha(i);
+        grad(i + 3*p) -= kappa * alpha(i);
+      } else {
+        grad(i) -= kappa * beta(i);
+        grad(i + p) += kappa * beta(i);
+        grad(i + 2*p) -= kappa * alpha(i);
+        grad(i + 3*p) += kappa * alpha(i);
+      }
     }
     return f;
   }
@@ -367,32 +402,68 @@ std::tuple<Eigen::MatrixXd, Eigen::MatrixXd> updateAlphaBetaPathwayNetwork(
 ) {
   int p = alpha.cols();
 
-  Eigen::VectorXd x(p + p);
+  Eigen::VectorXd x = Eigen::VectorXd::Zero(4*p);
+
+#if defined(_OPENMP)
+#pragma omp for
+#endif
   for (int i = 0; i < p; ++i) {
-    x(i) = alpha(0, i);
-    x(i + p) = beta(i, 0);
+    if (alpha(0, i) >= 0) {
+      x(i) = alpha(0, i);
+    } else {
+      x(i + p) = -alpha(0, i);
+    }
+
+    if (beta(i, 0) >= 0) {
+      x(i + 2*p) = beta(i, 0);
+    } else {
+      x(i + 3*p) = -beta(i, 0);
+    }
   }
+
+  LBFGSpp::LBFGSBParam<double> param;
+  param.epsilon        = 1e-4;
+  param.epsilon_rel    = 1e-4;
+  param.past           = 1;
+  param.delta          = 1e-5;
+  param.max_iterations = 3000;
+  param.max_linesearch = 200;
 
   PathwayNetworkObjectiveGrad pnog(
     alphaStep1, betaStep2, tauAlpha, tauBeta, laplacianMatrixA, laplacianMatrixB,
     kappa, rho, lambda1a, lambda1b, lambda2a, lambda2b, lambda2aStar, lambda2bStar
   );
+  Eigen::VectorXd lb = Eigen::VectorXd::Zero(4*p);
+  Eigen::VectorXd ub = Eigen::VectorXd::Zero(4*p);
 
+#if defined(_OPENMP)
+#pragma omp for
+#endif
+  for (int i = 0; i < 4*p; ++i) {
+    ub(i) = std::numeric_limits<double>::infinity();
+  }
+
+  LBFGSpp::LBFGSBSolver<double> solver(param);
   double fopt;
-  int status = Numer::optim_lbfgs(pnog, x, fopt, 5000, 1e-8, 1e-5);
-  if (status < 0) {
-    Rcpp::warning("algorithm did not converge");
+  int status = 0;
+  try {
+    solver.minimize(pnog, x, fopt, lb, ub);
+  } catch(const std::exception& e) {
+    status = -1;
+    Rcpp::warning(e.what());
   }
 
   Eigen::MatrixXd alphaNew(1, p), betaNew(p, 1);
+
+#if defined(_OPENMP)
+#pragma omp for
+#endif
   for (int i = 0; i < p; ++i) {
-    alphaNew(0, i) = x(i);
-    betaNew(i, 0) = x(i + p);
+    alphaNew(0, i) = x(i) - x(i + p);
+    betaNew(i, 0) = x(i + 2*p) - x(i + 3*p);
   }
   return std::make_tuple(alphaNew, betaNew);
 };
-
-*/
 
 Eigen::MatrixXd updateGammaFunc(
     Eigen::MatrixXd betaStep2,
@@ -507,12 +578,10 @@ Rcpp::List singleModalityAdmmFit(
         rho, lambda1a, lambda1b, lambda2a, lambda2b, kappa
       );
     }  else if (penaltyType == 4) {
-      /*
       std::tie(alphaNew, betaNew) = updateAlphaBetaPathwayNetwork(
         alpha, beta, laplacianMatrixA, laplacianMatrixB, alphaStep1New, betaStep2New, tauAlpha, tauBeta,
         rho, lambda1a, lambda1b, lambda2a, lambda2b, kappa, lambda2aStar, lambda2bStar
       );
-      */
     }
 
     // ADMM step 3: dual update
